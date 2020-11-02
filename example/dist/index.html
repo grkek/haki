@@ -1,0 +1,40 @@
+<Application gid="com.example.layout">
+  <!--
+    StyleSheet tags define the style for the components.
+      - src: The location of the file.
+  -->
+  <StyleSheet src="./example/dist/styles/style.css" />
+
+  <!--
+    Import tags define the custom elements imported from other HTML files.
+      - src: The location of the file.
+      - as: The component name exported from the file.
+  -->
+  <Import src="./example/dist/components/authorization.html" as="Authorization" />
+
+  <Script>
+    const windowWidth = 0;
+    const windowHeight = 0;
+
+    function authorizeUser() {
+      // Do nothing at the moment.
+    }
+  </Script>
+
+  <!-- GdkPixbuf::Pixbuf.new_from_file_at_scale("/home/user/Workspace/Private/layout/media/Screenshot.png", 256, 256, true) -->
+
+  <Window id="mainWindow" title="Hello, World!" width={windowWidth} height={windowHeight}>
+    <Box id="mainBox">
+
+      <Image id="gearImage" source="/home/user/Workspace/Private/layout/media/gear.png" width="256" height="256" />
+      <Label id="mainLabel" boxExpand="false" boxFill="true" boxPadding="10">
+        Hello, World!
+      </Label>
+
+
+      <Authorization />
+
+      <Button id="authorizationButton" onClick={authorizeUser} relief="none">Authorize</Button>
+    </Box>
+  </Window>
+</Application>

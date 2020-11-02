@@ -1,0 +1,21 @@
+name: layout
+version: 0.1.0
+
+authors:
+  - Giorgi Kavrelishvili <giorgi.kavrelishvili@pm.me>
+
+targets:
+  layout:
+    main: src/layout.cr
+
+dependencies:
+  duktape:
+    github: jessedoyle/duktape.cr
+    version: ~> 0.21.0
+
+  gobject:
+    github: jhass/crystal-gobject
+
+crystal: 0.35.1
+
+license: MIT

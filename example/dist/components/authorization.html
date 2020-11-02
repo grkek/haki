@@ -1,0 +1,27 @@
+<!--
+  Export tags export the component for other components to use.
+    - as: The component name exported from the file.
+-->
+<Export as="Authorization">
+  <Box>
+    <Script>
+      const authorization = {
+        properties: {
+          username: "",
+          password: "",
+        },
+        onUsernameChange: function (username) {
+          authorization.properties.username = username;
+        },
+        onPasswordChange: function (password) {
+          authorization.properties.password = password;
+        }
+      };
+    </Script>
+
+    <TextInput id="usernameTextInput" onChangeText={authorization.onUsernameChange} placeholder="E-Mail or username" />
+
+    <TextInput id="passwordTextInput" onChangeText={authorization.onPasswordChange} isPassword="true"
+      placeholder="Password" />
+  </Box>
+</Export>
