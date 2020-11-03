@@ -289,6 +289,8 @@ module Layout
           when Gtk::ApplicationWindow
             widget.add(box)
           end
+        when EventBox
+          nil
         else
           nil
         end
