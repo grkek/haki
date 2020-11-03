@@ -1,61 +1,40 @@
-#mainWindow {
+window#mainWindow {
   background-color: black;
 }
 
-#mainBox {
+box#mainBox {
   background-color: white;
 }
 
-#mainLabel {
+image#gearImage {
+  margin-top: 50px;
+}
+
+label#mainLabel {
   margin-top: 50px;
   font-size: 50px;
 }
 
-#usernameTextInput {
-  transition: all 1s ease;
-  font-size: 20px;
-  margin-top: 5px;
-  margin-left: 200px;
-  margin-bottom: 5px;
-  margin-right: 200px;
+label#mainLabel:focus {
+  color: red;
 }
 
-#usernameTextInput:active {
-  transition: all 1s ease;
-}
-
-#passwordTextInput {
-  transition: all 1s ease;
-  font-size: 20px;
-  margin-top: 5px;
-  margin-left: 200px;
-  margin-bottom: 5px;
-  margin-right: 200px;
-}
-
-#passwordTextInput selection {
-  background-color: orange;
-}
-
-#authorizationButton {
+button#authorizationButton {
   transition: all 1s ease;
   font-size: 25px;
   border-color: transparent;
   background-color: transparent;
   margin-top: 25px;
+  margin-bottom: 50px;
   color: black;
 }
 
-#authorizationButton:hover {
+button#authorizationButton:hover {
   transition: all 1s ease;
   color: gray;
 }
 
-#authorizationButton:active {
+button#authorizationButton:active {
   transition: all 1s ease;
   color: transparent;
-}
-
-#gearImage {
-  margin-top: 25px;
 }

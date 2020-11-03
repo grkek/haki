@@ -1,6 +1,6 @@
 # Layout
 
-[![Hello World](https://i.ibb.co/SRwNb29/image.png)](https://github.com/grkek/layout)
+[![Showcase](https://i.ibb.co/XLp8DhP/GTK-DEBUG.png)](https://github.com/grkek/layout)
 
 **Notice:** This project is <ins>experimental</ins>.
 

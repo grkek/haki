@@ -13,20 +13,20 @@
   <Import src="./example/dist/components/authorization.html" as="Authorization" />
 
   <Script>
-    const windowWidth = 0;
-    const windowHeight = 0;
+    const windowWidth = 800;
+    const windowHeight = 600;
 
     function authorizeUser() {
-      // Do nothing at the moment.
+      console.log(authorization.properties.username)
     }
   </Script>
-
-  <!-- GdkPixbuf::Pixbuf.new_from_file_at_scale("/home/user/Workspace/Private/layout/media/Screenshot.png", 256, 256, true) -->
 
   <Window id="mainWindow" title="Hello, World!" width={windowWidth} height={windowHeight}>
     <Box id="mainBox">
 
-      <Image id="gearImage" source="/home/user/Workspace/Private/layout/media/gear.png" width="256" height="256" />
+      <Image id="gearImage" source="/home/user/Workspace/Private/layout/example/dist/media/gear.png" width="256"
+        height="256" />
+
       <Label id="mainLabel" boxExpand="false" boxFill="true" boxPadding="10">
         Hello, World!
       </Label>

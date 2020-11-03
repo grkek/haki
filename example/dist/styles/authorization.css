@@ -1,0 +1,26 @@
+entry#usernameTextInput {
+  transition: all 1s ease;
+  font-size: 20px;
+  margin-top: 200px;
+  margin-left: 400px;
+  margin-bottom: 5px;
+  margin-right: 400px;
+}
+
+entry#usernameTextInput selection {
+  background-color: orange;
+}
+
+entry#passwordTextInput {
+  transition: all 1s ease;
+  font-size: 20px;
+  margin-top: 5px;
+  margin-left: 400px;
+  margin-bottom: 5px;
+  margin-right: 400px;
+}
+
+entry#passwordTextInput selection {
+  background-color: orange;
+}
+
