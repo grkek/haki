@@ -15,17 +15,39 @@
   <Script>
     const windowWidth = 800;
     const windowHeight = 600;
+    const styles = "/home/user/Workspace/Private/layout/example/dist/styles";
+
+    const isDarkModeEnabled = false;
 
     function authorizeUser() {
       console.log(authorization.properties.username)
+    }
+
+    function updateInterfaceMode(isDarkMode) {
+      if(isDarkMode) {
+        darkMode()
+      } else {
+        lightMode()
+      }
+    }
+
+    function darkMode() {
+      loadStyleSheet(styles + "/style.dark.css");
+      loadStyleSheet("/home/user/Workspace/Private/layout/example/dist/styles/authorization.dark.css");
+      isDarkModeEnabled = true;
+    }
+
+    function lightMode() {
+      loadStyleSheet("/home/user/Workspace/Private/layout/example/dist/styles/style.css");
+      loadStyleSheet("/home/user/Workspace/Private/layout/example/dist/styles/authorization.css");
+      isDarkModeEnabled = false;
     }
   </Script>
 
   <Window id="mainWindow" title="Hello, World!" width={windowWidth} height={windowHeight}>
     <Box id="mainBox">
-
-      <Image id="gearImage" source="/home/user/Workspace/Private/layout/example/dist/media/gear.png" width="256"
-        height="256" />
+      <Switch horizontalAlign="center" onValueChange={updateInterfaceMode}/>
+      <Image id="gearImage" source="/home/user/Workspace/Private/layout/example/dist/media/gear.png" width="256" height="256" />
 
       <Label id="mainLabel" boxExpand="false" boxFill="true" boxPadding="10">
         Hello, World!

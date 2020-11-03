@@ -7,7 +7,6 @@ module Layout
             sbx = Duktape::Sandbox.new(ptr)
             exit_code = sbx.require_int 0
             exit(exit_code)
-  
             sbx.call_success
           end
         end

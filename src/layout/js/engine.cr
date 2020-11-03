@@ -8,6 +8,7 @@ module Layout
       include Std::Native
       include Std::Io
       include Std::Net
+      include Std::Gtk
 
       INSTANCE = new
 
@@ -18,9 +19,11 @@ module Layout
 
       def initialize
         @runtime = Duktape::Runtime.new
+        # ameba:disable Lint/UselessAssign
         context = @runtime.context
 
         native()
+        gtk()
 
         {% if flag?(:net) %}
           net()

@@ -83,6 +83,7 @@ module Layout
         Layout::Dom::Text.new(contents)
       end
 
+      # ameba:disable Metrics/CyclomaticComplexity
       def parse_element : Layout::Dom::Node?
         children = [] of Layout::Dom::Node
 
@@ -135,6 +136,8 @@ module Layout
             Layout::Dom::TextInput.new(attrs)
           when "Image"
             Layout::Dom::Image.new(attrs)
+          when "Switch"
+            Layout::Dom::Switch.new(attrs)
           else
             if child = custom_components[tag_name]?.as(Layout::Dom::Element)
               child.attributes.merge!(attrs)
@@ -174,7 +177,7 @@ module Layout
               child.attributes.merge!(attrs)
               child.children.concat(children)
               child.on_component_did_mount
-              return child
+              child
             else
               raise Exceptions::InvalidElementException.new(tag_name, @position)
             end
@@ -210,7 +213,7 @@ module Layout
           value = parse_function
           assert!(next_char == '}', @position)
 
-          if ["onClick", "onChangeText", "onComponentDidMount"].includes?(key)
+          if ["onClick", "onChangeText", "onComponentDidMount", "onValueChange"].includes?(key)
             value
           else
             "#{Layout::Js::Engine::INSTANCE.evaluate(value)}"

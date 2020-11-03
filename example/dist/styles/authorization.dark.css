@@ -5,6 +5,7 @@ entry#usernameTextInput {
   margin-left: 300px;
   margin-bottom: 5px;
   margin-right: 300px;
+  color: white;
 }
 
 entry#usernameTextInput selection {
@@ -18,6 +19,7 @@ entry#passwordTextInput {
   margin-left: 300px;
   margin-bottom: 5px;
   margin-right: 300px;
+  color: white;
 }
 
 entry#passwordTextInput selection {

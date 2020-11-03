@@ -14,25 +14,40 @@ module Layout
         Layout::Js::Engine::INSTANCE.evaluate("const components = {};")
       end
 
-      def build_from_document(document)
-        File.open(document) do |fd|
-          structure = Layout::Parser.parse(fd.gets_to_end)
+      def build_from_document(fd)
+        structure = Layout::Parser.parse(fd.gets_to_end)
 
-          case structure
-          when Application
-            @application = Gtk::Application.new(
-              application_id: structure.as(Element).attributes["gid"]? || "com.layer.untitled"
-            )
+        case structure
+        when Application
+          @application = Gtk::Application.new(
+            application_id: structure.as(Element).attributes["gid"]? || "com.layer.untitled"
+          )
 
-            @application.try(&.on_activate do
-              structure.as(Element).on_component_did_mount
-              build_components(structure)
-              @window.try(&.show_all)
-            end)
-          else
-            # TODO: Refactor this later to an actual error message.
-            raise "The first component must always be an application."
-          end
+          @application.try(&.on_activate do
+            structure.as(Element).on_component_did_mount
+            build_components(structure)
+            @window.try(&.show_all)
+          end)
+        else
+          # TODO: Refactor this later to an actual error message.
+          raise "The first component must always be an application."
+        end
+      end
+
+      private def to_align(str : String) : Gtk::Align
+        case str
+        when "fill"
+          Gtk::Align::FILL
+        when "start"
+          Gtk::Align::START
+        when "end"
+          Gtk::Align::END
+        when "center"
+          Gtk::Align::CENTER
+        when "baseline"
+          Gtk::Align::BASELINE
+        else
+          Gtk::Align::BASELINE
         end
       end
 
@@ -44,6 +59,7 @@ module Layout
         end
       end
 
+      # ameba:disable Metrics/CyclomaticComplexity
       private def build_widget(child, widget : Gtk::Widget)
         case child
         when Button
@@ -51,6 +67,9 @@ module Layout
           relief = child.attributes["relief"]? || nil
           text = child.children[0].as(Text).data.to_s
           on_click = child.attributes["onClick"]? || ""
+
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
 
           case relief
           when "none"
@@ -61,7 +80,7 @@ module Layout
             relief_style = Gtk::ReliefStyle::NORMAL
           end
 
-          button = Gtk::Button.new(name: id, label: text, relief: relief_style)
+          button = Gtk::Button.new(name: id, label: text, relief: relief_style, halign: horizontal_align, valign: vertical_align)
 
           box_expand = child.attributes["boxExpand"]? || "false"
           box_fill = child.attributes["boxFill"]? || "false"
@@ -89,14 +108,17 @@ module Layout
           placeholder = child.attributes["placeholder"]? || nil
           text_changed = child.attributes["onChangeText"]? || nil
 
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+
           password_char = child.attributes["passwordCharacter"]? || nil
           visibility = to_bool(child.attributes["isPassword"]? || "false") ? false : true
           invisible_char = password_char.try(&.bytes.first.to_u32)
-          entry = Gtk::Entry.new(name: id, text: label, placeholder_text: placeholder, invisible_char: invisible_char, visibility: visibility)
+          entry = Gtk::Entry.new(name: id, text: label, placeholder_text: placeholder, invisible_char: invisible_char, visibility: visibility, halign: horizontal_align, valign: vertical_align)
 
           entry.buffer.on_inserted_text do |buffer|
             if text_changed
-              Layout::Js::Engine::INSTANCE.evaluate("#{text_changed.to_s}('#{buffer.text}')")
+              Layout::Js::Engine::INSTANCE.evaluate("#{text_changed}('#{buffer.text}')")
             end
           end
 
@@ -116,12 +138,46 @@ module Layout
           when Gtk::ApplicationWindow
             widget.add(entry)
           end
+        when Switch
+          id = child.attributes["id"]? || nil
+
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+
+          switch = Gtk::Switch.new(halign: horizontal_align, valign: vertical_align)
+
+          box_expand = child.attributes["boxExpand"]? || "false"
+          box_fill = child.attributes["boxFill"]? || "false"
+          box_padding = child.attributes["boxPadding"]? || "0"
+
+          value_change = child.attributes["onValueChange"]? || nil
+
+          if box_padding.includes?(".0")
+            box_padding = box_padding[..box_padding.size - 3]
+          end
+
+          switch.on_state_set do
+            if value_change
+              Layout::Js::Engine::INSTANCE.evaluate("#{value_change}(#{switch.active})")
+            end
+
+            true
+          end
+
+          child.on_component_did_mount
+
+          case widget
+          when Gtk::Box
+            widget.pack_start(switch, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
+          when Gtk::ApplicationWindow
+            widget.add(switch)
+          end
         when Image
           id = child.attributes["id"]? || nil
           source = child.attributes["source"]? || ""
 
           width = child.attributes["width"]? || "256"
-          height = child.attributes["height"] || "256"
+          height = child.attributes["height"]? || "256"
 
           preserve_aspect_ration = child.attributes["preserveAspectRation"]? || "true"
 
@@ -133,15 +189,22 @@ module Layout
             height = height[..height.size - 3]
           end
 
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+
           if width && height
             image = Gtk::Image.new(
               name: id,
-              pixbuf: GdkPixbuf::Pixbuf.new_from_file_at_scale(source, width.to_i, height.to_i, to_bool(preserve_aspect_ration))
+              pixbuf: GdkPixbuf::Pixbuf.new_from_file_at_scale(source, width.to_i, height.to_i, to_bool(preserve_aspect_ration)),
+              halign: horizontal_align,
+              valign: vertical_align
             )
           else
             image = Gtk::Image.new(
               name: id,
-              file: source
+              file: source,
+              halign: horizontal_align,
+              valign: vertical_align
             )
           end
 
@@ -164,7 +227,9 @@ module Layout
         when Label
           id = child.attributes["id"]? || nil
           text = child.children[0].as(Text).data.to_s
-          label = Gtk::Label.new(name: id, label: text)
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+          label = Gtk::Label.new(name: id, label: text, halign: horizontal_align, valign: vertical_align)
 
           box_expand = child.attributes["boxExpand"]? || "false"
           box_fill = child.attributes["boxFill"]? || "false"
@@ -189,11 +254,14 @@ module Layout
         end
       end
 
+      # ameba:disable Metrics/CyclomaticComplexity
       private def build_widgets(parent, widget : Gtk::Widget)
         parent.children.each do |child|
           case child
           when Box
             id = child.attributes["id"]? || nil
+            horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+            vertical_align = to_align(child.attributes["verticalAlign"]? || "")
             case child.attributes["orientation"]?
             when "vertical"
               orientation = Gtk::Orientation::VERTICAL
@@ -213,7 +281,7 @@ module Layout
 
             spacing = child.attributes["spacing"]? || "2"
 
-            box = Gtk::Box.new(name: id, orientation: orientation, spacing: spacing.to_i)
+            box = Gtk::Box.new(name: id, orientation: orientation, spacing: spacing.to_i, halign: horizontal_align, valign: vertical_align)
 
             child.children.each do |subchild|
               case subchild
