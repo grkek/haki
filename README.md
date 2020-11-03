@@ -4,7 +4,7 @@
 
 **Notice:** This project is <ins>experimental</ins>.
 
-**Keep in mind:** The rendered window on the right side is a native Gtk window, not a browser.
+**Keep in mind:** The rendered window on the left side is a native Gtk window, not a browser.
 
 # Installation
 
