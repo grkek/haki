@@ -14,23 +14,25 @@ module Layout
         Layout::Js::Engine::INSTANCE.evaluate("const components = {};")
       end
 
-      def build_from_document(fd)
-        structure = Layout::Parser.parse(fd.gets_to_end)
+      def build_from_document(document)
+        File.open(document) do |fd|
+          structure = Layout::Parser.parse(fd.gets_to_end)
 
-        case structure
-        when Application
-          @application = Gtk::Application.new(
-            application_id: structure.as(Element).attributes["gid"]? || "com.layer.untitled"
-          )
+          case structure
+          when Application
+            @application = Gtk::Application.new(
+              application_id: structure.as(Element).attributes["gid"]? || "com.layer.untitled"
+            )
 
-          @application.try(&.on_activate do
-            structure.as(Element).on_component_did_mount
-            build_components(structure)
-            @window.try(&.show_all)
-          end)
-        else
-          # TODO: Refactor this later to an actual error message.
-          raise "The first component must always be an application."
+            @application.try(&.on_activate do
+              structure.as(Element).on_component_did_mount
+              build_components(structure)
+              @window.try(&.show_all)
+            end)
+          else
+            # TODO: Refactor this later to an actual error message.
+            raise "The first component must always be an application."
+          end
         end
       end
 
@@ -143,8 +145,9 @@ module Layout
 
           horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
           vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+          value = to_bool(child.attributes["value"]? || "false")
 
-          switch = Gtk::Switch.new(halign: horizontal_align, valign: vertical_align)
+          switch = Gtk::Switch.new(name: id, halign: horizontal_align, valign: vertical_align, state: value)
 
           box_expand = child.attributes["boxExpand"]? || "false"
           box_fill = child.attributes["boxFill"]? || "false"
@@ -249,6 +252,43 @@ module Layout
           end
         when StyleSheet
           process_stylesheet(child)
+        when Box
+          id = child.attributes["id"]? || nil
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+          case child.attributes["orientation"]?
+          when "vertical"
+            orientation = Gtk::Orientation::VERTICAL
+          when "horizontal"
+            orientation = Gtk::Orientation::HORIZONTAL
+          else
+            orientation = Gtk::Orientation::VERTICAL
+          end
+
+          box_expand = child.attributes["boxExpand"]? || "false"
+          box_fill = child.attributes["boxFill"]? || "false"
+          box_padding = child.attributes["boxPadding"]? || "0"
+
+          if box_padding.includes?(".0")
+            box_padding = box_padding[..box_padding.size - 3]
+          end
+
+          spacing = child.attributes["spacing"]? || "2"
+
+          box = Gtk::Box.new(name: id, orientation: orientation, spacing: spacing.to_i, halign: horizontal_align, valign: vertical_align)
+
+          child.children.each do |subchild|
+            build_widget(subchild, box)
+          end
+
+          child.on_component_did_mount
+
+          case widget
+          when Gtk::Box
+            widget.pack_start(box, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
+          when Gtk::ApplicationWindow
+            widget.add(box)
+          end
         else
           nil
         end
@@ -257,54 +297,7 @@ module Layout
       # ameba:disable Metrics/CyclomaticComplexity
       private def build_widgets(parent, widget : Gtk::Widget)
         parent.children.each do |child|
-          case child
-          when Box
-            id = child.attributes["id"]? || nil
-            horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
-            vertical_align = to_align(child.attributes["verticalAlign"]? || "")
-            case child.attributes["orientation"]?
-            when "vertical"
-              orientation = Gtk::Orientation::VERTICAL
-            when "horizontal"
-              orientation = Gtk::Orientation::HORIZONTAL
-            else
-              orientation = Gtk::Orientation::VERTICAL
-            end
-
-            box_expand = child.attributes["boxExpand"]? || "false"
-            box_fill = child.attributes["boxFill"]? || "false"
-            box_padding = child.attributes["boxPadding"]? || "0"
-
-            if box_padding.includes?(".0")
-              box_padding = box_padding[..box_padding.size - 3]
-            end
-
-            spacing = child.attributes["spacing"]? || "2"
-
-            box = Gtk::Box.new(name: id, orientation: orientation, spacing: spacing.to_i, halign: horizontal_align, valign: vertical_align)
-
-            child.children.each do |subchild|
-              case subchild
-              when Box
-                build_widgets(subchild, box)
-              else
-                build_widget(subchild, box)
-              end
-            end
-
-            child.on_component_did_mount
-
-            case widget
-            when Gtk::Box
-              widget.pack_start(box, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
-            when Gtk::ApplicationWindow
-              widget.add(box)
-            end
-          when StyleSheet
-            process_stylesheet(child)
-          else
-            build_widget(child, widget.not_nil!)
-          end
+          build_widget(child, widget.not_nil!)
         end
       end
 

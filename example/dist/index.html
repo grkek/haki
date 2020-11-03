@@ -17,7 +17,7 @@
     const windowHeight = 600;
     const styles = "/home/user/Workspace/Private/layout/example/dist/styles";
 
-    const isDarkModeEnabled = false;
+    const isDarkModeEnabled = true;
 
     function authorizeUser() {
       console.log(authorization.properties.username)
@@ -33,21 +33,35 @@
 
     function darkMode() {
       loadStyleSheet(styles + "/style.dark.css");
-      loadStyleSheet("/home/user/Workspace/Private/layout/example/dist/styles/authorization.dark.css");
+      loadStyleSheet(styles + "/authorization.dark.css");
       isDarkModeEnabled = true;
     }
 
     function lightMode() {
-      loadStyleSheet("/home/user/Workspace/Private/layout/example/dist/styles/style.css");
-      loadStyleSheet("/home/user/Workspace/Private/layout/example/dist/styles/authorization.css");
+      loadStyleSheet(styles + "/style.css");
+      loadStyleSheet(styles + "/authorization.css");
       isDarkModeEnabled = false;
     }
   </Script>
 
   <Window id="mainWindow" title="Hello, World!" width={windowWidth} height={windowHeight}>
     <Box id="mainBox">
-      <Switch horizontalAlign="center" onValueChange={updateInterfaceMode}/>
-      <Image id="gearImage" source="/home/user/Workspace/Private/layout/example/dist/media/gear.png" width="256" height="256" />
+      <Box id="darkModeBox" orientation="horizontal">
+        <Label
+          id="darkModeLabel"
+          boxExpand="true"
+          boxFill="true"
+          boxPadding="10"
+          horizontalAlign="end">Enable dark mode?</Label>
+        
+        <Switch
+          id="darkModeSwitch"
+          boxExpand="true"
+          boxFill="true"
+          boxPadding="10"
+          horizontalAlign="start" 
+          onValueChange={updateInterfaceMode}/>
+      </Box>
 
       <Label id="mainLabel" boxExpand="false" boxFill="true" boxPadding="10">
         Hello, World!

@@ -1,5 +1,8 @@
 entry#usernameTextInput {
   transition: all 1s ease;
+  border: none;
+  color: white;
+  background-color: black;
   font-size: 20px;
   margin-top: 200px;
   margin-left: 300px;
@@ -13,6 +16,9 @@ entry#usernameTextInput selection {
 
 entry#passwordTextInput {
   transition: all 1s ease;
+  border: none;
+  color: white;
+  background-color: black;
   font-size: 20px;
   margin-top: 5px;
   margin-left: 300px;

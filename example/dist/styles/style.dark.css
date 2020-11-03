@@ -3,15 +3,30 @@ window#mainWindow {
 }
 
 box#mainBox {
+  transition: all 1s ease;
   background-color: black;
 }
 
-image#gearImage {
+label#darkModeLabel {
+  transition: all 1s ease;
   color: white;
-  margin-top: 50px;
 }
 
+switch#darkModeSwitch {
+  transition: all 1s ease;
+  background-color: transparent;
+  color: white;
+}
+
+switch#darkModeSwitch slider {
+  transition: all 1s ease;
+	background-color: white;
+	border: none;
+}
+
+
 label#mainLabel {
+  transition: all 1s ease;
   color: white;
   margin-top: 50px;
   font-size: 50px;
@@ -29,7 +44,7 @@ button#authorizationButton {
 
 button#authorizationButton:hover {
   transition: all 1s ease;
-  color: gray;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 button#authorizationButton:active {

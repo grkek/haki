@@ -19,11 +19,11 @@ shards install
 See the example and determin how everything works from that, it is a 3 line code file which just executes the builder, other than that everything is in either LTML or JavaScript.
 
 ```
-# The -D tag defines a compile time flag,
-# the flag defined below is an IO flag,
-# which enables the Input/Output capabilities for the
-# Duktape JS engine.
-crystal run example/application -Dio
+# The GTK_DEBUG environment constant spawns a sepparate window
+# with which you can debug UI elements.
+GTK_DEBUG=interactive crystal run example/application.cr
 ```
+
+When you compile the application click the `Dark mode` button to feel how smooth and comfortable the transition is.
 
 Instead of using Glade 3.x.x we are going to use this.
