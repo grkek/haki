@@ -165,6 +165,8 @@ module Layout
             Layout::Dom::Window.new(attrs, children)
           when "Box"
             Layout::Dom::Box.new(attrs, children)
+          when "Tab"
+            Layout::Dom::Tab.new(attrs, children)
           when "EventBox"
             Layout::Dom::EventBox.new(attrs, children)
           when "Button"

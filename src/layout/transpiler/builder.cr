@@ -99,6 +99,9 @@ module Layout
           end
 
           case widget
+          when Gtk::Notebook
+            widget.append_page(button, nil)
+            
           when Gtk::Box
             widget.pack_start(button, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
           when Gtk::ApplicationWindow
@@ -135,6 +138,9 @@ module Layout
           child.on_component_did_mount
 
           case widget
+          when Gtk::Notebook
+            widget.append_page(entry, nil)
+            
           when Gtk::Box
             widget.pack_start(entry, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
           when Gtk::ApplicationWindow
@@ -170,6 +176,9 @@ module Layout
           child.on_component_did_mount
 
           case widget
+          when Gtk::Notebook
+            widget.append_page(switch, nil)
+            
           when Gtk::Box
             widget.pack_start(switch, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
           when Gtk::ApplicationWindow
@@ -222,6 +231,9 @@ module Layout
           child.on_component_did_mount
 
           case widget
+          when Gtk::Notebook
+            widget.append_page(image, nil)
+            
           when Gtk::Box
             widget.pack_start(image, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
           when Gtk::ApplicationWindow
@@ -245,6 +257,9 @@ module Layout
           child.on_component_did_mount
 
           case widget
+          when Gtk::Notebook
+            widget.append_page(label, nil)
+            
           when Gtk::Box
             widget.pack_start(label, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
           when Gtk::ApplicationWindow
@@ -252,6 +267,35 @@ module Layout
           end
         when StyleSheet
           process_stylesheet(child)
+        when Tab
+          id = child.attributes["id"]? || nil
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+
+          tab = Gtk::Notebook.new(name: id, halign: horizontal_align, valign: vertical_align)
+          
+          child.children.each do |subchild|
+            build_widget(subchild, tab)
+          end
+
+          box_expand = child.attributes["boxExpand"]? || "false"
+          box_fill = child.attributes["boxFill"]? || "false"
+          box_padding = child.attributes["boxPadding"]? || "0"
+
+          if box_padding.includes?(".0")
+            box_padding = box_padding[..box_padding.size - 3]
+          end
+
+          child.on_component_did_mount
+
+          case widget
+          when Gtk::Notebook
+            widget.append_page(tab, nil)
+          when Gtk::Box
+            widget.pack_start(tab, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
+          when Gtk::ApplicationWindow
+            widget.add(tab)
+          end
         when Box
           id = child.attributes["id"]? || nil
           horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
@@ -284,6 +328,9 @@ module Layout
           child.on_component_did_mount
 
           case widget
+          when Gtk::Notebook
+            widget.append_page(box, nil)
+            
           when Gtk::Box
             widget.pack_start(box, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
           when Gtk::ApplicationWindow
