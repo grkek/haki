@@ -1,4 +1,9 @@
 <Application gid="com.example.layout">
+  <Script>
+    function experimentWindowSize() {
+      resizeWindow(1600, 1200)
+    }
+  </Script>
   <!--
     StyleSheet tags define the style for the components.
       - src: The location of the file.
@@ -69,7 +74,7 @@
 
       <Authorization />
 
-      <Button id="authorizationButton" onClick={authorizeUser} relief="none">Authorize</Button>
+      <Button id="authorizationButton" onClick={experimentWindowSize} relief="none">Resize the window.</Button>
 
       <Tab>
         <Box>

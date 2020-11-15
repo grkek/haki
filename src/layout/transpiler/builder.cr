@@ -384,8 +384,28 @@ module Layout
               default_width: width.to_i,
               default_height: height.to_i
             )
+            
 
             @window.try(&.connect "destroy", &->exit)
+            
+            window_resize_proc = ->(width : Int32, height : Int32) { 
+              @window.not_nil!.resize(width, height)
+            }
+
+            context = Layout::Js::Engine::INSTANCE.runtime.context
+
+            context.push_heap_stash
+            context.push_pointer(::Box.box(window_resize_proc))
+            context.put_prop_string(-2, "resizeWindowClosure")
+          
+            context.push_global_proc("resizeWindow", 2) do |ptr|
+              env = Duktape::Sandbox.new(ptr)
+              env.push_heap_stash
+              env.get_prop_string(-1, "resizeWindowClosure")
+              function = ::Box(Proc(Int32, Int32, Nil)).unbox(env.get_pointer(-1))
+              function.call(env.get_int(0), env.get_int(1))
+              env.call_success
+            end
 
             child.on_component_did_mount
             build_widgets(child, @window.not_nil!)
