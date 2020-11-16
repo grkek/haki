@@ -7,6 +7,10 @@ box#mainBox {
   background-color: white;
 }
 
+box#disablerBox{
+  margin-bottom: 20px;
+}
+
 label#darkModeLabel {
   transition: all 1s ease;
   color: black;

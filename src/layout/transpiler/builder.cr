@@ -8,7 +8,7 @@ module Layout
     class Builder
       property application : Gtk::Application?
       property window : Gtk::ApplicationWindow?
-      property components = [] of Gtk::Widget
+      property components = {} of String => Pointer(LibGtk::Widget)
 
       def initialize
         Layout::Js::Engine::INSTANCE.evaluate("const components = {};")
@@ -27,6 +27,111 @@ module Layout
             @application.try(&.on_activate do
               structure.as(Element).on_component_did_mount
               build_components(structure)
+
+              get_element_by_id_proc = ->(id : String) {
+                @components[id].as(Pointer(LibGtk::Widget))
+              }
+  
+              context = Layout::Js::Engine::INSTANCE.runtime.context
+  
+              context.push_heap_stash
+              context.push_pointer(::Box.box(get_element_by_id_proc))
+              context.put_prop_string(-2, "getElementByIdClosure")
+            
+              context.push_global_proc("getElementById", 1) do |ptr|
+                env = Duktape::Sandbox.new(ptr)
+                env.push_heap_stash
+                env.get_prop_string(-1, "getElementByIdClosure")
+                function = ::Box(Proc(String, Pointer(LibGtk::Widget))).unbox(env.get_pointer(-1))
+                component_id = env.get_string(0).not_nil!
+                pointer = function.call(component_id)
+                widget = pointer.as(Gtk::Widget)
+
+                set_opacity_proc = ->(opacity : Float64) { widget.opacity = opacity }
+                set_visibility_proc = ->(visible : Bool) { widget.visible = visible }
+                
+                env.push_heap_stash
+                env.push_pointer(::Box.box(set_opacity_proc))
+                env.put_prop_string(-2, "setOpacityClosure")
+
+                env.push_heap_stash
+                env.push_pointer(::Box.box(set_visibility_proc))
+                env.put_prop_string(-2, "setVisibilityClosure")
+
+                idx = env.push_object()
+
+                env.push_proc(1) do |ptr|
+                  sbx = Duktape::Sandbox.new(ptr)
+                  sbx.push_heap_stash
+                  sbx.get_prop_string(-1, "setOpacityClosure")
+                  proc = ::Box(Proc(Float64, Nil)).unbox(sbx.get_pointer(-1))
+                  opacity = sbx.get_number(0).not_nil!.as(Float64)
+                  proc.call(opacity)
+                  sbx.call_success
+                end
+
+                env.put_prop_string(-2, "setOpacity")
+
+                env.push_proc(1) do |ptr|
+                  sbx = Duktape::Sandbox.new(ptr)
+                  sbx.push_heap_stash
+                  sbx.get_prop_string(-1, "setVisibilityClosure")
+                  proc = ::Box(Proc(Bool, Nil)).unbox(sbx.get_pointer(-1))
+                  visible = sbx.get_boolean(0).not_nil!
+                  proc.call(visible)
+                  sbx.call_success
+                end
+
+                env.put_prop_string(-2, "setVisible")
+
+                env.push_number(widget.opacity)
+                env.put_prop_string(idx, "opacity")
+
+                env.push_boolean(widget.visible)
+                env.put_prop_string(idx, "visible")
+                env.call_success
+              end
+
+              context.push_heap_stash
+              context.push_pointer(::Box.box(get_element_by_id_proc))
+              context.put_prop_string(-2, "setElementOpacityByIdClosure")
+            
+              context.push_global_proc("setElementOpacityById", 2) do |ptr|
+                env = Duktape::Sandbox.new(ptr)
+                env.push_heap_stash
+                env.get_prop_string(-1, "setElementOpacityByIdClosure")
+                function = ::Box(Proc(String, Pointer(LibGtk::Widget))).unbox(env.get_pointer(-1))
+                component_id = env.get_string(0).not_nil!
+                component_value = env.get_number(1).not_nil!.as(Float64)
+                widget = function.call(component_id)
+                idx = env.push_object()
+                widget = widget.as(Gtk::Widget)
+
+                widget.opacity = component_value
+                
+                env.call_success
+              end
+
+              context.push_heap_stash
+              context.push_pointer(::Box.box(get_element_by_id_proc))
+              context.put_prop_string(-2, "setElementVisibilityByIdClosure")
+            
+              context.push_global_proc("setElementVisibilityById", 2) do |ptr|
+                env = Duktape::Sandbox.new(ptr)
+                env.push_heap_stash
+                env.get_prop_string(-1, "setElementVisibilityByIdClosure")
+                function = ::Box(Proc(String, Pointer(LibGtk::Widget))).unbox(env.get_pointer(-1))
+                component_id = env.get_string(0).not_nil!
+                component_value = env.get_boolean(1).not_nil!
+                widget = function.call(component_id)
+                idx = env.push_object()
+                widget = widget.as(Gtk::Widget)
+
+                widget.visible = component_value
+                
+                env.call_success
+              end
+
               @window.try(&.show_all)
             end)
           else
@@ -98,6 +203,10 @@ module Layout
             Layout::Js::Engine::INSTANCE.evaluate("#{on_click}()")
           end
 
+          if id
+            @components[id.not_nil!] = button.as(Pointer(LibGtk::Widget))
+          end
+
           case widget
           when Gtk::Notebook
             widget.append_page(button, nil)
@@ -137,6 +246,10 @@ module Layout
 
           child.on_component_did_mount
 
+          if id
+            @components[id.not_nil!] = entry.as(Pointer(LibGtk::Widget))
+          end
+
           case widget
           when Gtk::Notebook
             widget.append_page(entry, nil)
@@ -174,6 +287,10 @@ module Layout
           end
 
           child.on_component_did_mount
+
+          if id
+            @components[id.not_nil!] = switch.as(Pointer(LibGtk::Widget))
+          end
 
           case widget
           when Gtk::Notebook
@@ -230,6 +347,10 @@ module Layout
 
           child.on_component_did_mount
 
+          if id
+            @components[id.not_nil!] = image.as(Pointer(LibGtk::Widget))
+          end
+
           case widget
           when Gtk::Notebook
             widget.append_page(image, nil)
@@ -255,6 +376,10 @@ module Layout
           end
 
           child.on_component_did_mount
+
+          if id
+            @components[id.not_nil!] = label.as(Pointer(LibGtk::Widget))
+          end
 
           case widget
           when Gtk::Notebook
@@ -287,6 +412,10 @@ module Layout
           end
 
           child.on_component_did_mount
+
+          if id
+            @components[id.not_nil!] = tab.as(Pointer(LibGtk::Widget))
+          end
 
           case widget
           when Gtk::Notebook
@@ -326,6 +455,10 @@ module Layout
           end
 
           child.on_component_did_mount
+
+          if id
+            @components[id.not_nil!] = box.as(Pointer(LibGtk::Widget))
+          end
 
           case widget
           when Gtk::Notebook
@@ -408,6 +541,11 @@ module Layout
             end
 
             child.on_component_did_mount
+
+            if id
+              @components[id.not_nil!] = @window.not_nil!.as(Pointer(LibGtk::Widget))
+            end
+
             build_widgets(child, @window.not_nil!)
           else
             # TODO: Handle other non-crucial parts.

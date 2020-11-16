@@ -1,9 +1,4 @@
 <Application gid="com.example.layout">
-  <Script>
-    function experimentWindowSize() {
-      resizeWindow(1600, 1200)
-    }
-  </Script>
   <!--
     StyleSheet tags define the style for the components.
       - src: The location of the file.
@@ -22,10 +17,30 @@
     const windowHeight = 600;
     const styles = "/home/user/Workspace/Private/layout/example/dist/styles";
 
+    const opacity = 1.0;
+
     const isDarkModeEnabled = true;
 
-    function authorizeUser() {
-      console.log(authorization.properties.username)
+    function experimentWindowSize() {
+      resizeWindow(windowWidth * 2, windowHeight * 2);
+    }
+
+    function toggleVisiblityOfUsernameTextInput() {
+      var usernameTextInput = getElementById("usernameTextInput")
+      if(usernameTextInput.opacity === 1) {
+        usernameTextInput.setOpacity(0)
+      } else {
+        usernameTextInput.setOpacity(1)
+      }
+    }
+
+    function toggleVisiblityOfPasswordTextInput() {
+      var passwordTextInput = getElementById("passwordTextInput")
+      if(passwordTextInput.opacity === 1) {
+        passwordTextInput.setOpacity(0)
+      } else {
+        passwordTextInput.setOpacity(1)
+      }
     }
 
     function updateInterfaceMode(isDarkMode) {
@@ -76,25 +91,39 @@
 
       <Button id="authorizationButton" onClick={experimentWindowSize} relief="none">Resize the window.</Button>
 
-      <Tab>
-        <Box>
-          <Label>
-            Hello, World!
-          </Label>
-        </Box>
+      <Box
+        id="disablerBox"
+        orientation="horizontal">
+        <Label
+          id="darkModeLabel"
+          boxExpand="true"
+          boxFill="true"
+          boxPadding="10"
+          horizontalAlign="end">Disable the UsernameTextInput?</Label>
+        
+        <Switch
+          id="darkModeSwitch"
+          boxExpand="true"
+          boxFill="true"
+          boxPadding="10"
+          horizontalAlign="start" 
+          onValueChange={toggleVisiblityOfUsernameTextInput}/>
 
-        <Box>
-          <Label>
-            Hello, Sun!
-          </Label>
-        </Box>
-
-        <Box>
-          <Label>
-            Hello, Moon!
-          </Label>
-        </Box>
-      </Tab>
+        <Label
+          id="darkModeLabel"
+          boxExpand="true"
+          boxFill="true"
+          boxPadding="10"
+          horizontalAlign="end">Disable the PasswordTextInput?</Label>
+        
+        <Switch
+          id="darkModeSwitch"
+          boxExpand="true"
+          boxFill="true"
+          boxPadding="10"
+          horizontalAlign="start" 
+          onValueChange={toggleVisiblityOfPasswordTextInput}/>
+      </Box>
     </Box>
   </Window>
 </Application>
