@@ -11,10 +11,11 @@ targets:
 dependencies:
   duktape:
     github: jessedoyle/duktape.cr
-    version: ~> 0.21.0
+    version: ~> 1.0.0
 
   gobject:
     github: jhass/crystal-gobject
+    version: ~> 0.10.0
 
 development_dependencies:
   ameba:

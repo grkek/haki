@@ -12,6 +12,9 @@
           password: "",
         },
         onUsernameChange: function (username) {
+          var label = getElementById("mainLabel");
+          label.setText(username);
+
           authorization.properties.username = username;
         },
         onPasswordChange: function (password) {

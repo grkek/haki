@@ -31,13 +31,13 @@ module Layout
               get_element_by_id_proc = ->(id : String) {
                 @components[id].as(Pointer(LibGtk::Widget))
               }
-  
+
               context = Layout::Js::Engine::INSTANCE.runtime.context
-  
+
               context.push_heap_stash
               context.push_pointer(::Box.box(get_element_by_id_proc))
               context.put_prop_string(-2, "getElementByIdClosure")
-            
+
               context.push_global_proc("getElementById", 1) do |ptr|
                 env = Duktape::Sandbox.new(ptr)
                 env.push_heap_stash
@@ -49,7 +49,8 @@ module Layout
 
                 set_opacity_proc = ->(opacity : Float64) { widget.opacity = opacity }
                 set_visibility_proc = ->(visible : Bool) { widget.visible = visible }
-                
+                set_text_proc = ->(text : String) { widget.as(Gtk::Label).text = text }
+
                 env.push_heap_stash
                 env.push_pointer(::Box.box(set_opacity_proc))
                 env.put_prop_string(-2, "setOpacityClosure")
@@ -58,7 +59,11 @@ module Layout
                 env.push_pointer(::Box.box(set_visibility_proc))
                 env.put_prop_string(-2, "setVisibilityClosure")
 
-                idx = env.push_object()
+                env.push_heap_stash
+                env.push_pointer(::Box.box(set_text_proc))
+                env.put_prop_string(-2, "setTextClosure")
+
+                idx = env.push_object
 
                 env.push_proc(1) do |ptr|
                   sbx = Duktape::Sandbox.new(ptr)
@@ -84,6 +89,18 @@ module Layout
 
                 env.put_prop_string(-2, "setVisible")
 
+                env.push_proc(1) do |ptr|
+                  sbx = Duktape::Sandbox.new(ptr)
+                  sbx.push_heap_stash
+                  sbx.get_prop_string(-1, "setTextClosure")
+                  proc = ::Box(Proc(String, Nil)).unbox(sbx.get_pointer(-1))
+                  text = sbx.get_string(0).not_nil!
+                  proc.call(text)
+                  sbx.call_success
+                end
+
+                env.put_prop_string(-2, "setText")
+
                 env.push_number(widget.opacity)
                 env.put_prop_string(idx, "opacity")
 
@@ -95,7 +112,7 @@ module Layout
               context.push_heap_stash
               context.push_pointer(::Box.box(get_element_by_id_proc))
               context.put_prop_string(-2, "setElementOpacityByIdClosure")
-            
+
               context.push_global_proc("setElementOpacityById", 2) do |ptr|
                 env = Duktape::Sandbox.new(ptr)
                 env.push_heap_stash
@@ -104,18 +121,18 @@ module Layout
                 component_id = env.get_string(0).not_nil!
                 component_value = env.get_number(1).not_nil!.as(Float64)
                 widget = function.call(component_id)
-                idx = env.push_object()
+                idx = env.push_object
                 widget = widget.as(Gtk::Widget)
 
                 widget.opacity = component_value
-                
+
                 env.call_success
               end
 
               context.push_heap_stash
               context.push_pointer(::Box.box(get_element_by_id_proc))
               context.put_prop_string(-2, "setElementVisibilityByIdClosure")
-            
+
               context.push_global_proc("setElementVisibilityById", 2) do |ptr|
                 env = Duktape::Sandbox.new(ptr)
                 env.push_heap_stash
@@ -124,11 +141,11 @@ module Layout
                 component_id = env.get_string(0).not_nil!
                 component_value = env.get_boolean(1).not_nil!
                 widget = function.call(component_id)
-                idx = env.push_object()
+                idx = env.push_object
                 widget = widget.as(Gtk::Widget)
 
                 widget.visible = component_value
-                
+
                 env.call_success
               end
 
@@ -210,7 +227,6 @@ module Layout
           case widget
           when Gtk::Notebook
             widget.append_page(button, nil)
-            
           when Gtk::Box
             widget.pack_start(button, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
           when Gtk::ApplicationWindow
@@ -253,7 +269,6 @@ module Layout
           case widget
           when Gtk::Notebook
             widget.append_page(entry, nil)
-            
           when Gtk::Box
             widget.pack_start(entry, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
           when Gtk::ApplicationWindow
@@ -295,7 +310,6 @@ module Layout
           case widget
           when Gtk::Notebook
             widget.append_page(switch, nil)
-            
           when Gtk::Box
             widget.pack_start(switch, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
           when Gtk::ApplicationWindow
@@ -324,7 +338,8 @@ module Layout
           if width && height
             image = Gtk::Image.new(
               name: id,
-              pixbuf: GdkPixbuf::Pixbuf.new_from_file_at_scale(source, width.to_i, height.to_i, to_bool(preserve_aspect_ration)),
+              # TODO: Create an issue in the GTK bindings repository.
+              # pixbuf: GdkPixbuf::Pixbuf.new_from_file_at_scale(source, width.to_i, height.to_i, to_bool(preserve_aspect_ration)),
               halign: horizontal_align,
               valign: vertical_align
             )
@@ -354,7 +369,6 @@ module Layout
           case widget
           when Gtk::Notebook
             widget.append_page(image, nil)
-            
           when Gtk::Box
             widget.pack_start(image, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
           when Gtk::ApplicationWindow
@@ -384,7 +398,6 @@ module Layout
           case widget
           when Gtk::Notebook
             widget.append_page(label, nil)
-            
           when Gtk::Box
             widget.pack_start(label, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
           when Gtk::ApplicationWindow
@@ -398,7 +411,7 @@ module Layout
           vertical_align = to_align(child.attributes["verticalAlign"]? || "")
 
           tab = Gtk::Notebook.new(name: id, halign: horizontal_align, valign: vertical_align)
-          
+
           child.children.each do |subchild|
             build_widget(subchild, tab)
           end
@@ -463,7 +476,6 @@ module Layout
           case widget
           when Gtk::Notebook
             widget.append_page(box, nil)
-            
           when Gtk::Box
             widget.pack_start(box, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
           when Gtk::ApplicationWindow
@@ -517,11 +529,10 @@ module Layout
               default_width: width.to_i,
               default_height: height.to_i
             )
-            
 
             @window.try(&.connect "destroy", &->exit)
-            
-            window_resize_proc = ->(width : Int32, height : Int32) { 
+
+            window_resize_proc = ->(width : Int32, height : Int32) {
               @window.not_nil!.resize(width, height)
             }
 
@@ -530,7 +541,7 @@ module Layout
             context.push_heap_stash
             context.push_pointer(::Box.box(window_resize_proc))
             context.put_prop_string(-2, "resizeWindowClosure")
-          
+
             context.push_global_proc("resizeWindow", 2) do |ptr|
               env = Duktape::Sandbox.new(ptr)
               env.push_heap_stash

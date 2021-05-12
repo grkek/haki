@@ -15,10 +15,8 @@
   <Script>
     const windowWidth = 800;
     const windowHeight = 600;
-    const styles = "/home/user/Workspace/Private/layout/example/dist/styles";
-
+    const styles = "./example/dist/styles";
     const opacity = 1.0;
-
     const isDarkModeEnabled = true;
 
     function experimentWindowSize() {
@@ -95,14 +93,14 @@
         id="disablerBox"
         orientation="horizontal">
         <Label
-          id="darkModeLabel"
+          id="usernameTextInputLableDialog"
           boxExpand="true"
           boxFill="true"
           boxPadding="10"
-          horizontalAlign="end">Disable the UsernameTextInput?</Label>
+          horizontalAlign="end">Disable the UsernameTextInput? ${isDarkModeEnabled}</Label>
         
         <Switch
-          id="darkModeSwitch"
+          id="usernameDisableSwitch"
           boxExpand="true"
           boxFill="true"
           boxPadding="10"
@@ -110,14 +108,14 @@
           onValueChange={toggleVisiblityOfUsernameTextInput}/>
 
         <Label
-          id="darkModeLabel"
+          id="passwordTextInputLableDialog"
           boxExpand="true"
           boxFill="true"
           boxPadding="10"
           horizontalAlign="end">Disable the PasswordTextInput?</Label>
         
         <Switch
-          id="darkModeSwitch"
+          id="passwordDisableSwitch"
           boxExpand="true"
           boxFill="true"
           boxPadding="10"
