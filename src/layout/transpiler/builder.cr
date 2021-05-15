@@ -10,10 +10,6 @@ module Layout
       property window : Gtk::ApplicationWindow?
       property components = {} of String => Pointer(LibGtk::Widget)
 
-      def initialize
-        Layout::Js::Engine::INSTANCE.evaluate("const components = {};")
-      end
-
       def build_from_document(document)
         File.open(document) do |fd|
           structure = Layout::Parser.parse(fd.gets_to_end)
@@ -25,23 +21,20 @@ module Layout
             )
 
             @application.try(&.on_activate do
-              structure.as(Element).on_component_did_mount
-              build_components(structure)
-
-              get_element_by_id_proc = ->(id : String) {
-                @components[id].as(Pointer(LibGtk::Widget))
+              get_element_by_id_proc = ->(class_id : String) {
+                @components[class_id].as(Pointer(LibGtk::Widget))
               }
 
               context = Layout::Js::Engine::INSTANCE.runtime.context
 
               context.push_heap_stash
               context.push_pointer(::Box.box(get_element_by_id_proc))
-              context.put_prop_string(-2, "getElementByIdClosure")
+              context.put_prop_string(-2, "getElementByClassIdClosure")
 
-              context.push_global_proc("getElementById", 1) do |ptr|
+              context.push_global_proc("getElementByClassId", 1) do |ptr|
                 env = Duktape::Sandbox.new(ptr)
                 env.push_heap_stash
-                env.get_prop_string(-1, "getElementByIdClosure")
+                env.get_prop_string(-1, "getElementByClassIdClosure")
                 function = ::Box(Proc(String, Pointer(LibGtk::Widget))).unbox(env.get_pointer(-1))
                 component_id = env.get_string(0).not_nil!
                 pointer = function.call(component_id)
@@ -49,7 +42,20 @@ module Layout
 
                 set_opacity_proc = ->(opacity : Float64) { widget.opacity = opacity }
                 set_visibility_proc = ->(visible : Bool) { widget.visible = visible }
-                set_text_proc = ->(text : String) { widget.as(Gtk::Label).text = text }
+                set_foreground_color_proc = ->(r : Float64, g : Float64, b : Float64, a : Float64) { widget.override_color(Gtk::StateFlags::NORMAL, Gdk::RGBA.new(r, g, b, a)) }
+                set_background_color_proc = ->(r : Float64, g : Float64, b : Float64, a : Float64) { widget.override_background_color(Gtk::StateFlags::NORMAL, Gdk::RGBA.new(r, g, b, a)) }
+
+                begin
+                  set_text_proc = ->(text : String) { widget.as(Gtk::Entry).text = text }
+                rescue
+                  set_text_proc = ->(text : String) { widget.as(Gtk::Label).text = text }
+                end
+
+                begin
+                  get_text_proc = ->{ widget.as(Gtk::Entry).text }
+                rescue
+                  get_text_proc = ->{ widget.as(Gtk::Label).text }
+                end
 
                 env.push_heap_stash
                 env.push_pointer(::Box.box(set_opacity_proc))
@@ -62,6 +68,18 @@ module Layout
                 env.push_heap_stash
                 env.push_pointer(::Box.box(set_text_proc))
                 env.put_prop_string(-2, "setTextClosure")
+
+                env.push_heap_stash
+                env.push_pointer(::Box.box(get_text_proc))
+                env.put_prop_string(-2, "getTextClosure")
+
+                env.push_heap_stash
+                env.push_pointer(::Box.box(set_foreground_color_proc))
+                env.put_prop_string(-2, "setForegroundColorClosure")
+
+                env.push_heap_stash
+                env.push_pointer(::Box.box(set_background_color_proc))
+                env.put_prop_string(-2, "setBackgroundColorClosure")
 
                 idx = env.push_object
 
@@ -100,6 +118,51 @@ module Layout
                 end
 
                 env.put_prop_string(-2, "setText")
+
+                env.push_proc(1) do |ptr|
+                  sbx = Duktape::Sandbox.new(ptr)
+                  sbx.push_heap_stash
+                  sbx.get_prop_string(-1, "getTextClosure")
+                  proc = ::Box(Proc(String)).unbox(sbx.get_pointer(-1))
+                  sbx.push_string(proc.call)
+                  sbx.call_success
+                end
+
+                env.put_prop_string(-2, "getText")
+
+                env.push_proc(4) do |ptr|
+                  sbx = Duktape::Sandbox.new(ptr)
+                  sbx.push_heap_stash
+                  sbx.get_prop_string(-1, "setForegroundColorClosure")
+                  proc = ::Box(Proc(Float64, Float64, Float64, Float64, Nil)).unbox(sbx.get_pointer(-1))
+
+                  r = sbx.get_number(0).not_nil!
+                  g = sbx.get_number(1).not_nil!
+                  b = sbx.get_number(2).not_nil!
+                  a = sbx.get_number(3).not_nil!
+
+                  proc.call(r.to_f64, g.to_f64, b.to_f64, a.to_f64)
+                  sbx.call_success
+                end
+
+                env.put_prop_string(-2, "setForegroundColor")
+
+                env.push_proc(4) do |ptr|
+                  sbx = Duktape::Sandbox.new(ptr)
+                  sbx.push_heap_stash
+                  sbx.get_prop_string(-1, "setBackgroundColorClosure")
+                  proc = ::Box(Proc(Float64, Float64, Float64, Float64, Nil)).unbox(sbx.get_pointer(-1))
+
+                  r = sbx.get_number(0).not_nil!
+                  g = sbx.get_number(1).not_nil!
+                  b = sbx.get_number(2).not_nil!
+                  a = sbx.get_number(2).not_nil!
+
+                  proc.call(r.to_f64, g.to_f64, b.to_f64, a.to_f64)
+                  sbx.call_success
+                end
+
+                env.put_prop_string(-2, "setBackgroundColor")
 
                 env.push_number(widget.opacity)
                 env.put_prop_string(idx, "opacity")
@@ -149,6 +212,8 @@ module Layout
                 env.call_success
               end
 
+              structure.as(Element).on_component_did_mount
+              build_components(structure)
               @window.try(&.show_all)
             end)
           else
@@ -186,6 +251,14 @@ module Layout
       # ameba:disable Metrics/CyclomaticComplexity
       private def build_widget(child, widget : Gtk::Widget)
         case child
+        when Text
+        else
+          unless child.as(Element).attributes["classId"]?
+            child.as(Element).attributes["classId"] = "#{child.kind.downcase}#{UUID.random.hexstring}"
+          end
+        end
+
+        case child
         when Button
           id = child.attributes["id"]? || nil
           relief = child.attributes["relief"]? || nil
@@ -214,14 +287,12 @@ module Layout
             box_padding = box_padding[..box_padding.size - 3]
           end
 
-          child.on_component_did_mount
-
           button.on_clicked do
             Layout::Js::Engine::INSTANCE.evaluate("#{on_click}()")
           end
 
-          if id
-            @components[id.not_nil!] = button.as(Pointer(LibGtk::Widget))
+          if class_id = child.attributes["classId"]?
+            @components[class_id] = button.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -232,11 +303,27 @@ module Layout
           when Gtk::ApplicationWindow
             widget.add(button)
           end
+
+          button.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          child.on_component_did_mount
         when TextInput
           id = child.attributes["id"]? || nil
           label = child.attributes["label"]? || nil
           placeholder = child.attributes["placeholder"]? || nil
           text_changed = child.attributes["onChangeText"]? || nil
+          cut_clipboard = child.attributes["onCut"]? || nil
+          copy_clipboard = child.attributes["onCopy"]? || nil
+          paste_clipboard = child.attributes["onPaste"]? || nil
+          on_activate = child.attributes["onActivate"]? || nil
 
           horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
           vertical_align = to_align(child.attributes["verticalAlign"]? || "")
@@ -252,6 +339,36 @@ module Layout
             end
           end
 
+          entry.buffer.on_deleted_text do |buffer|
+            if text_changed
+              Layout::Js::Engine::INSTANCE.evaluate("#{text_changed}('#{buffer.text}')")
+            end
+          end
+
+          entry.on_cut_clipboard do
+            if cut_clipboard
+              Layout::Js::Engine::INSTANCE.evaluate("#{cut_clipboard}('#{entry.buffer.text}')")
+            end
+          end
+
+          entry.on_copy_clipboard do
+            if copy_clipboard
+              Layout::Js::Engine::INSTANCE.evaluate("#{copy_clipboard}('#{entry.buffer.text}')")
+            end
+          end
+
+          entry.on_paste_clipboard do
+            if paste_clipboard
+              Layout::Js::Engine::INSTANCE.evaluate("#{paste_clipboard}('#{entry.buffer.text}')")
+            end
+          end
+
+          entry.on_activate do
+            if on_activate
+              Layout::Js::Engine::INSTANCE.evaluate("#{on_activate}('#{entry.buffer.text}')")
+            end
+          end
+
           box_expand = child.attributes["boxExpand"]? || "false"
           box_fill = child.attributes["boxFill"]? || "false"
           box_padding = child.attributes["boxPadding"]? || "0"
@@ -260,10 +377,8 @@ module Layout
             box_padding = box_padding[..box_padding.size - 3]
           end
 
-          child.on_component_did_mount
-
-          if id
-            @components[id.not_nil!] = entry.as(Pointer(LibGtk::Widget))
+          if class_id = child.attributes["classId"]?
+            @components[class_id] = entry.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -274,6 +389,18 @@ module Layout
           when Gtk::ApplicationWindow
             widget.add(entry)
           end
+
+          entry.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          child.on_component_did_mount
         when Switch
           id = child.attributes["id"]? || nil
 
@@ -301,10 +428,8 @@ module Layout
             true
           end
 
-          child.on_component_did_mount
-
-          if id
-            @components[id.not_nil!] = switch.as(Pointer(LibGtk::Widget))
+          if class_id = child.attributes["classId"]?
+            @components[class_id] = switch.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -315,9 +440,21 @@ module Layout
           when Gtk::ApplicationWindow
             widget.add(switch)
           end
+
+          switch.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          child.on_component_did_mount
         when Image
           id = child.attributes["id"]? || nil
-          source = child.attributes["source"]? || ""
+          source = child.attributes["src"]? || ""
 
           width = child.attributes["width"]? || "256"
           height = child.attributes["height"]? || "256"
@@ -360,10 +497,8 @@ module Layout
             box_padding = box_padding[..box_padding.size - 3]
           end
 
-          child.on_component_did_mount
-
-          if id
-            @components[id.not_nil!] = image.as(Pointer(LibGtk::Widget))
+          if class_id = child.attributes["classId"]?
+            @components[class_id] = image.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -374,6 +509,18 @@ module Layout
           when Gtk::ApplicationWindow
             widget.add(image)
           end
+
+          image.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          child.on_component_did_mount
         when Label
           id = child.attributes["id"]? || nil
           text = child.children[0].as(Text).data.to_s
@@ -389,10 +536,8 @@ module Layout
             box_padding = box_padding[..box_padding.size - 3]
           end
 
-          child.on_component_did_mount
-
-          if id
-            @components[id.not_nil!] = label.as(Pointer(LibGtk::Widget))
+          if class_id = child.attributes["classId"]?
+            @components[class_id] = label.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -403,8 +548,18 @@ module Layout
           when Gtk::ApplicationWindow
             widget.add(label)
           end
-        when StyleSheet
-          process_stylesheet(child)
+
+          label.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          child.on_component_did_mount
         when Tab
           id = child.attributes["id"]? || nil
           horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
@@ -424,10 +579,8 @@ module Layout
             box_padding = box_padding[..box_padding.size - 3]
           end
 
-          child.on_component_did_mount
-
-          if id
-            @components[id.not_nil!] = tab.as(Pointer(LibGtk::Widget))
+          if class_id = child.attributes["classId"]?
+            @components[class_id] = tab.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -438,6 +591,18 @@ module Layout
           when Gtk::ApplicationWindow
             widget.add(tab)
           end
+
+          tab.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          child.on_component_did_mount
         when Box
           id = child.attributes["id"]? || nil
           horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
@@ -467,10 +632,18 @@ module Layout
             build_widget(subchild, box)
           end
 
-          child.on_component_did_mount
+          box.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
 
-          if id
-            @components[id.not_nil!] = box.as(Pointer(LibGtk::Widget))
+          if class_id = child.attributes["classId"]?
+            @components[class_id] = box.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -481,6 +654,8 @@ module Layout
           when Gtk::ApplicationWindow
             widget.add(box)
           end
+
+          child.on_component_did_mount
         when EventBox
           nil
         else
@@ -488,8 +663,21 @@ module Layout
         end
       end
 
+      private def recursive_stylesheet_processing(parent)
+        parent.children.each do |child|
+          case child
+          when StyleSheet
+            process_stylesheet(child)
+          else
+            recursive_stylesheet_processing(child)
+          end
+        end
+      end
+
       # ameba:disable Metrics/CyclomaticComplexity
       private def build_widgets(parent, widget : Gtk::Widget)
+        recursive_stylesheet_processing(parent)
+
         parent.children.each do |child|
           build_widget(child, widget.not_nil!)
         end
@@ -513,6 +701,10 @@ module Layout
             title = child.attributes["title"]? || "Untitled"
             width = child.attributes["width"]? || "800"
             height = child.attributes["height"]? || "600"
+
+            unless child.as(Element).attributes["classId"]?
+              child.as(Element).attributes["classId"] = "#{child.kind.downcase}#{UUID.random.hexstring}"
+            end
 
             if width.includes?(".0")
               width = width[..width.size - 3]
@@ -551,11 +743,11 @@ module Layout
               env.call_success
             end
 
-            child.on_component_did_mount
-
-            if id
-              @components[id.not_nil!] = @window.not_nil!.as(Pointer(LibGtk::Widget))
+            if class_id = child.attributes["classId"]?
+              @components[class_id] = @window.not_nil!.as(Pointer(LibGtk::Widget))
             end
+
+            child.on_component_did_mount
 
             build_widgets(child, @window.not_nil!)
           else

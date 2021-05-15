@@ -5,7 +5,7 @@ module Layout
     module Std
       module Gtk
         macro gtk
-          context.push_global_proc("loadStyleSheet", 1) do |ptr|
+          context.push_global_proc("__std__load_style_sheet__", 1) do |ptr|
             sbx = Duktape::Sandbox.new(ptr)
             file = sbx.require_string(0)
             css_provider = Gtk::CssProvider.new

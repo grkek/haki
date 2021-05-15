@@ -1,53 +1,60 @@
-window#mainWindow {
+#mainWindow {
   background-color: black;
 }
 
-box#mainBox {
+#mainBox {
   transition: all 1s ease;
-  background-color: black;
+  background-color: white;
 }
 
-label#darkModeLabel {
-  transition: all 1s ease;
-  color: white;
+#disablerBox{
+  margin-bottom: 20px;
 }
 
-switch#darkModeSwitch {
+#darkModeLabel {
+  transition: all 1s ease;
+  color: black;
+}
+
+#darkModeSwitch {
   transition: all 1s ease;
   background-color: transparent;
-  color: white;
+  color: black;
 }
 
-switch#darkModeSwitch slider {
+#darkModeSwitch slider {
   transition: all 1s ease;
-	background-color: white;
+	background-color: black;
 	border: none;
 }
 
-
-label#mainLabel {
+#mainLabel {
   transition: all 1s ease;
-  color: white;
+  color: black;
   margin-top: 50px;
   font-size: 50px;
 }
 
-button#authorizationButton {
+#mainLabel:focus {
+  color: red;
+}
+
+#authorizationButton {
   transition: all 1s ease;
   font-size: 25px;
   border-color: transparent;
   background-color: transparent;
   margin-top: 25px;
   margin-bottom: 50px;
-  color: white;
+  color: black;
 }
 
-button#authorizationButton:hover {
+#authorizationButton:hover {
   transition: all 1s ease;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(0, 0, 0, 0.5);
 }
 
-button#authorizationButton:active {
+#authorizationButton:active {
   transition: all 1s ease;
   color: transparent;
 }

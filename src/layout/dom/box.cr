@@ -28,6 +28,13 @@ module Layout
             end
           end
         end
+
+        if id = @attributes["id"]?
+          Layout::Js::Engine::INSTANCE.evaluate(<<-JS
+            const #{id}State = #{self.to_json}
+          JS
+          )
+        end
       end
 
       def to_html : String

@@ -1,5 +1,6 @@
+require "json"
 require "./layout/**"
 
-GC.disable()
+GC.disable
 
 module Layout; end

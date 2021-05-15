@@ -1,32 +1,26 @@
-entry#usernameTextInput {
-  transition: all 1s ease;
-  border: none;
-  color: white;
-  background-color: black;
+#usernameTextInput {
+  transition: all 0s ease;
   font-size: 20px;
-  margin-top: 200px;
-  margin-left: 300px;
+  margin-top: 5px;
+  margin-left: 150px;
   margin-bottom: 5px;
-  margin-right: 300px;
+  margin-right: 150px;
 }
 
-entry#usernameTextInput selection {
+#usernameTextInput selection {
   background-color: orange;
 }
 
-entry#passwordTextInput {
-  transition: all 1s ease;
-  border: none;
-  color: white;
-  background-color: black;
+#passwordTextInput {
+  transition: all 0s ease;
   font-size: 20px;
   margin-top: 5px;
-  margin-left: 300px;
+  margin-left: 150px;
   margin-bottom: 5px;
-  margin-right: 300px;
+  margin-right: 150px;
 }
 
-entry#passwordTextInput selection {
+#passwordTextInput selection {
   background-color: orange;
 }
 

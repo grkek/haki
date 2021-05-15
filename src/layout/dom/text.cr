@@ -3,6 +3,7 @@ require "./node"
 module Layout
   module Dom
     class Text < Node
+      include JSON::Serializable
       property data : String = ""
 
       def initialize(data : String)

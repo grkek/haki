@@ -3,6 +3,7 @@ require "./node"
 module Layout
   module Dom
     class Element < Node
+      include JSON::Serializable
       @attributes : Hash(String, String)
 
       getter :attributes
@@ -30,8 +31,36 @@ module Layout
       end
 
       def on_component_did_mount
+        if class_id = @attributes["classId"]?
+          Layout::Js::Engine::INSTANCE.evaluate("const #{class_id}State = #{self.to_json};")
+        end
+
         if function = @attributes["onComponentDidMount"]?
-          Layout::Js::Engine::INSTANCE.evaluate(function)
+          if class_id = @attributes["classId"]?
+            Layout::Js::Engine::INSTANCE.evaluate("#{function}(#{class_id}State)")
+          else
+            Layout::Js::Engine::INSTANCE.evaluate("#{function}({})")
+          end
+        end
+      end
+
+      def on_component_did_update(class_id, event_type)
+        if function = @attributes["onComponentDidUpdate"]?
+          if class_id = @attributes["classId"]?
+            Layout::Js::Engine::INSTANCE.evaluate("#{function}(#{class_id}State, \"#{class_id}\", \"#{event_type}\")")
+          else
+            Layout::Js::Engine::INSTANCE.evaluate("#{function}({}, \"#{class_id}\", \"#{event_type}\")")
+          end
+        end
+      end
+
+      def on_component_will_unmount
+        if function = @attributes["onComponentWillUnmount"]?
+          if class_id = @attributes["classId"]?
+            Layout::Js::Engine::INSTANCE.evaluate("#{function}(#{class_id}State)")
+          else
+            Layout::Js::Engine::INSTANCE.evaluate("#{function}({})")
+          end
         end
       end
 

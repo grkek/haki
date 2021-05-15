@@ -31,14 +31,19 @@ module Layout
           end
         end
 
-        @children.each do |child|
-          case child
-          when Layout::Dom::Text
-            begin
-              Layout::Js::Engine::INSTANCE.evaluate(child.data.strip)
-            rescue exception
-              pp exception
-              Layout::Js::Engine::INSTANCE.runtime.context.dump!
+        if source_file = @attributes["src"]?
+          fp = File.open(source_file).gets_to_end
+          Layout::Js::Engine::INSTANCE.evaluate(fp)
+        else
+          @children.each do |child|
+            case child
+            when Layout::Dom::Text
+              begin
+                Layout::Js::Engine::INSTANCE.evaluate(child.data.strip)
+              rescue exception
+                pp exception
+                Layout::Js::Engine::INSTANCE.runtime.context.dump!
+              end
             end
           end
         end

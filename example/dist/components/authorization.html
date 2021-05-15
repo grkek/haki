@@ -4,28 +4,19 @@
 -->
 <Export as="Authorization">
   <StyleSheet src="./example/dist/styles/authorization.css" />
+  <Script src="./example/dist/scripts/authorization.js"/>
+
   <Box>
-    <Script>
-      const authorization = {
-        properties: {
-          username: "",
-          password: "",
-        },
-        onUsernameChange: function (username) {
-          var label = getElementById("mainLabel");
-          label.setText(username);
+    <TextInput
+      id="usernameTextInput"
+      placeholder="E-Mail or username"
+      onComponentDidUpdate={onComponentDidUpdate}
+    />
 
-          authorization.properties.username = username;
-        },
-        onPasswordChange: function (password) {
-          authorization.properties.password = password;
-        }
-      };
-    </Script>
-
-    <TextInput id="usernameTextInput" onChangeText={authorization.onUsernameChange} placeholder="E-Mail or username" />
-
-    <TextInput id="passwordTextInput" onChangeText={authorization.onPasswordChange} isPassword="true"
-      placeholder="Password" />
+    <TextInput
+      id="passwordTextInput"
+      isPassword="true"
+      placeholder="Password"
+    />
   </Box>
 </Export>

@@ -106,20 +106,7 @@ module Layout
           case tag_name
           when "Import"
             begin
-              File.open(attrs["src"].not_nil!) do |fd|
-                element = Parser.parse(fd.gets_to_end).as(Layout::Dom::Export)
-                if element.attributes["as"].not_nil! == attrs["as"].not_nil!
-                  case element.children.first
-                  when Layout::Dom::StyleSheet
-                    element.children[1].children.push(element.children.first)
-                    custom_components[attrs["as"].not_nil!] = element.children[1]
-                  else
-                    custom_components[attrs["as"].not_nil!] = element.children.first
-                  end
-                else
-                  raise Exceptions::ImportNotFoundException.new(attrs["src"].not_nil!, attrs["as"].not_nil!, element.attributes["as"].not_nil!)
-                end
-              end
+              custom_components[attrs["as"].not_nil!] = Layout::Dom::Import.new(attrs)
             rescue exception
               case exception
               when Enumerable::EmptyError
@@ -132,6 +119,10 @@ module Layout
             nil
           when "StyleSheet"
             Layout::Dom::StyleSheet.new(attrs)
+          when "Script"
+            Layout::Dom::Script.new(attrs, children)
+
+            nil
           when "TextInput"
             Layout::Dom::TextInput.new(attrs)
           when "Image"
@@ -139,10 +130,38 @@ module Layout
           when "Switch"
             Layout::Dom::Switch.new(attrs)
           else
-            if child = custom_components[tag_name]?.as(Layout::Dom::Element)
-              child.attributes.merge!(attrs)
-              child.on_component_did_mount
-              child
+            if child = custom_components[tag_name]?
+              child = child.as(Layout::Dom::Element)
+              begin
+                File.open(child.attributes["src"].not_nil!) do |fd|
+                  element = Parser.parse(fd.gets_to_end).as(Layout::Dom::Export)
+
+                  if element.attributes["as"].not_nil! == child.attributes["as"].not_nil!
+                    case element.children.first
+                    when Layout::Dom::StyleSheet
+                      element.children[1].children.push(element.children.first)
+                      child = element.children[1].as(Layout::Dom::Element)
+                      child.attributes.merge!(attrs)
+                      child.on_component_did_mount
+                      child
+                    else
+                      child = element.children.first.as(Layout::Dom::Element)
+                      child.attributes.merge!(attrs)
+                      child.on_component_did_mount
+                      child
+                    end
+                  else
+                    raise Exceptions::ImportNotFoundException.new(child.attributes["src"].not_nil!, child.attributes["as"].not_nil!, element.attributes["as"].not_nil!)
+                  end
+                end
+              rescue exception
+                case exception
+                when Enumerable::EmptyError
+                  raise Exceptions::EmptyComponentException.new
+                else
+                  raise exception
+                end
+              end
             else
               raise Exceptions::InvalidElementException.new(tag_name, @position)
             end
@@ -217,7 +236,18 @@ module Layout
           value = parse_function
           assert!(next_char == '}', @position)
 
-          if ["onClick", "onChangeText", "onComponentDidMount", "onValueChange"].includes?(key)
+          if [
+               "onClick",
+               "onChangeText",
+               "onCut",
+               "onPaste",
+               "onCopy",
+               "onComponentDidMount",
+               "onComponentDidUpdate",
+               "onComponentWillUnmount",
+               "onValueChange",
+               "onActivate",
+             ].includes?(key)
             value
           else
             "#{Layout::Js::Engine::INSTANCE.evaluate(value)}"

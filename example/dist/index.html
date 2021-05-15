@@ -3,125 +3,29 @@
     StyleSheet tags define the style for the components.
       - src: The location of the file.
   -->
-  <StyleSheet src="./example/dist/styles/style.css" />
+  <StyleSheet src="./example/dist/styles/index.css" />
 
   <!--
     Import tags define the custom elements imported from other HTML files.
       - src: The location of the file.
       - as: The component name exported from the file.
   -->
-  <Import src="./example/dist/components/authorization.html" as="Authorization" />
+  <Import src="./example/dist/components/authorization.html" as="Authorization"/>
 
-  <Script>
-    const windowWidth = 800;
-    const windowHeight = 600;
-    const styles = "./example/dist/styles";
-    const opacity = 1.0;
-    const isDarkModeEnabled = true;
+  <!--
+    Script tags define the JavaScript content of our GUI front-end.
+      - src: The location of the file.
+  -->
+  <Script src="./example/dist/scripts/index.js"/>
 
-    function experimentWindowSize() {
-      resizeWindow(windowWidth * 2, windowHeight * 2);
-    }
-
-    function toggleVisiblityOfUsernameTextInput() {
-      var usernameTextInput = getElementById("usernameTextInput")
-      if(usernameTextInput.opacity === 1) {
-        usernameTextInput.setOpacity(0)
-      } else {
-        usernameTextInput.setOpacity(1)
-      }
-    }
-
-    function toggleVisiblityOfPasswordTextInput() {
-      var passwordTextInput = getElementById("passwordTextInput")
-      if(passwordTextInput.opacity === 1) {
-        passwordTextInput.setOpacity(0)
-      } else {
-        passwordTextInput.setOpacity(1)
-      }
-    }
-
-    function updateInterfaceMode(isDarkMode) {
-      if(isDarkMode) {
-        darkMode()
-      } else {
-        lightMode()
-      }
-    }
-
-    function darkMode() {
-      loadStyleSheet(styles + "/style.dark.css");
-      loadStyleSheet(styles + "/authorization.dark.css");
-      isDarkModeEnabled = true;
-    }
-
-    function lightMode() {
-      loadStyleSheet(styles + "/style.css");
-      loadStyleSheet(styles + "/authorization.css");
-      isDarkModeEnabled = false;
-    }
-  </Script>
-
-  <Window id="mainWindow" title="Hello, World!" width={windowWidth} height={windowHeight}>
+  <Window id="mainWindow" title="Hello, World!" width="800" height="600" onComponentDidMount={onComponentDidMount}>
     <Box id="mainBox">
-      <Box id="darkModeBox" orientation="horizontal">
-        <Label
-          id="darkModeLabel"
-          boxExpand="true"
-          boxFill="true"
-          boxPadding="10"
-          horizontalAlign="end">Enable dark mode?</Label>
-        
-        <Switch
-          id="darkModeSwitch"
-          boxExpand="true"
-          boxFill="true"
-          boxPadding="10"
-          horizontalAlign="start" 
-          onValueChange={updateInterfaceMode}/>
-      </Box>
-
-      <Label id="mainLabel" boxExpand="false" boxFill="true" boxPadding="10">
+      <Label id="mainLabel">
         Hello, World!
       </Label>
 
       <Authorization />
-
-      <Button id="authorizationButton" onClick={experimentWindowSize} relief="none">Resize the window.</Button>
-
-      <Box
-        id="disablerBox"
-        orientation="horizontal">
-        <Label
-          id="usernameTextInputLableDialog"
-          boxExpand="true"
-          boxFill="true"
-          boxPadding="10"
-          horizontalAlign="end">Disable the UsernameTextInput? ${isDarkModeEnabled}</Label>
-        
-        <Switch
-          id="usernameDisableSwitch"
-          boxExpand="true"
-          boxFill="true"
-          boxPadding="10"
-          horizontalAlign="start" 
-          onValueChange={toggleVisiblityOfUsernameTextInput}/>
-
-        <Label
-          id="passwordTextInputLableDialog"
-          boxExpand="true"
-          boxFill="true"
-          boxPadding="10"
-          horizontalAlign="end">Disable the PasswordTextInput?</Label>
-        
-        <Switch
-          id="passwordDisableSwitch"
-          boxExpand="true"
-          boxFill="true"
-          boxPadding="10"
-          horizontalAlign="start" 
-          onValueChange={toggleVisiblityOfPasswordTextInput}/>
-      </Box>
+      <Authorization />
     </Box>
   </Window>
 </Application>

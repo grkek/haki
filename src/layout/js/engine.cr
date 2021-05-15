@@ -5,10 +5,12 @@ require "./std/**"
 module Layout
   module Js
     class Engine
-      include Std::Native
-      include Std::Io
+      include Std::Process
+      include Std::FileSystem
       include Std::Net
       include Std::Gtk
+      include Std::Misc
+      include Std::System
 
       INSTANCE = new
 
@@ -22,30 +24,36 @@ module Layout
         # ameba:disable Lint/UselessAssign
         context = @runtime.context
 
-        native()
+        misc()
+        process()
         gtk()
+        net()
+        fs()
+        system()
 
-        {% if flag?(:net) %}
-          net()
-        {% end %}
-
-        {% if flag?(:io) %}
-          io()
-        {% end %}
+        context.eval_string! <<-JS
+          String.prototype.format = function() {
+              var formatted = this;
+              for( var arg in arguments ) {
+                  formatted = formatted.replace("{" + arg + "}", arguments[arg]);
+              }
+              return formatted;
+          };
+        JS
       end
 
       def lazy_evaluate(js : String)
         is_lazy = true
         loop do
           if !is_lazy
-            @runtime.eval(js)
+            @runtime.context.eval(js)
             break
           end
         end
       end
 
       def evaluate(js : String)
-        @runtime.eval(js)
+        @runtime.context.eval(js)
       end
     end
   end
