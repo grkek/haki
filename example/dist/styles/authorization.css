@@ -1,4 +1,4 @@
-#usernameTextInput {
+.usernameTextInput {
   transition: all 0s ease;
   font-size: 20px;
   margin-top: 5px;
@@ -7,11 +7,11 @@
   margin-right: 150px;
 }
 
-#usernameTextInput selection {
+.usernameTextInput selection {
   background-color: orange;
 }
 
-#passwordTextInput {
+.passwordTextInput {
   transition: all 0s ease;
   font-size: 20px;
   margin-top: 5px;
@@ -20,7 +20,7 @@
   margin-right: 150px;
 }
 
-#passwordTextInput selection {
+.passwordTextInput selection {
   background-color: orange;
 }
 

@@ -240,6 +240,13 @@ module Layout
         end
       end
 
+      private def add_class_to_css(widget, class_name)
+        if class_name
+          context = widget.style_context
+          context.add_class(class_name.not_nil!)
+        end
+      end
+
       private def to_bool(str : String) : Bool
         if str == "true"
           true
@@ -260,7 +267,7 @@ module Layout
 
         case child
         when Button
-          id = child.attributes["id"]? || nil
+          id = child.attributes["class"]? || nil
           relief = child.attributes["relief"]? || nil
           text = child.children[0].as(Text).data.to_s
           on_click = child.attributes["onClick"]? || ""
@@ -314,9 +321,10 @@ module Layout
             end
           end
 
+          add_class_to_css(button, id)
           child.on_component_did_mount
         when TextInput
-          id = child.attributes["id"]? || nil
+          id = child.attributes["class"]? || nil
           label = child.attributes["label"]? || nil
           placeholder = child.attributes["placeholder"]? || nil
           text_changed = child.attributes["onChangeText"]? || nil
@@ -400,9 +408,10 @@ module Layout
             end
           end
 
+          add_class_to_css(entry, id)
           child.on_component_did_mount
         when Switch
-          id = child.attributes["id"]? || nil
+          id = child.attributes["class"]? || nil
 
           horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
           vertical_align = to_align(child.attributes["verticalAlign"]? || "")
@@ -451,9 +460,10 @@ module Layout
             end
           end
 
+          add_class_to_css(switch, id)
           child.on_component_did_mount
         when Image
-          id = child.attributes["id"]? || nil
+          id = child.attributes["class"]? || nil
           source = child.attributes["src"]? || ""
 
           width = child.attributes["width"]? || "256"
@@ -520,9 +530,10 @@ module Layout
             end
           end
 
+          add_class_to_css(image, id)
           child.on_component_did_mount
         when Label
-          id = child.attributes["id"]? || nil
+          id = child.attributes["class"]? || nil
           text = child.children[0].as(Text).data.to_s
           horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
           vertical_align = to_align(child.attributes["verticalAlign"]? || "")
@@ -559,9 +570,10 @@ module Layout
             end
           end
 
+          add_class_to_css(label, id)
           child.on_component_did_mount
         when Tab
-          id = child.attributes["id"]? || nil
+          id = child.attributes["class"]? || nil
           horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
           vertical_align = to_align(child.attributes["verticalAlign"]? || "")
 
@@ -602,9 +614,10 @@ module Layout
             end
           end
 
+          add_class_to_css(tab, id)
           child.on_component_did_mount
         when Box
-          id = child.attributes["id"]? || nil
+          id = child.attributes["class"]? || nil
           horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
           vertical_align = to_align(child.attributes["verticalAlign"]? || "")
           case child.attributes["orientation"]?
@@ -655,6 +668,7 @@ module Layout
             widget.add(box)
           end
 
+          add_class_to_css(box, id)
           child.on_component_did_mount
         when EventBox
           nil
@@ -697,7 +711,7 @@ module Layout
           when StyleSheet
             process_stylesheet(child)
           when Window
-            id = child.attributes["id"]? || nil
+            id = child.attributes["class"]? || nil
             title = child.attributes["title"]? || "Untitled"
             width = child.attributes["width"]? || "800"
             height = child.attributes["height"]? || "600"
