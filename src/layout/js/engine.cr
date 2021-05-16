@@ -53,7 +53,7 @@ module Layout
       end
 
       def evaluate(js : String)
-        @runtime.context.eval(js)
+        @runtime.context.eval!(js)
       end
     end
   end

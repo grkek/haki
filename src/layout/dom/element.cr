@@ -47,7 +47,7 @@ module Layout
       def on_component_did_update(class_id, event_type)
         if function = @attributes["onComponentDidUpdate"]?
           if class_id = @attributes["classId"]?
-            Layout::Js::Engine::INSTANCE.evaluate("#{function}(#{class_id}State, \"#{class_id}\", \"#{event_type}\")")
+            Layout::Js::Engine::INSTANCE.evaluate("#{function}(#{class_id}State, getElementByClassId(\"#{class_id}\"), \"#{event_type}\")")
           else
             Layout::Js::Engine::INSTANCE.evaluate("#{function}({}, \"#{class_id}\", \"#{event_type}\")")
           end

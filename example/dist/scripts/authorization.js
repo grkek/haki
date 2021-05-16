@@ -1,6 +1,4 @@
-function onComponentDidUpdate(_state, classId, eventType) {
-  const usernameField = getElementByClassId(classId);
-
+function onComponentDidUpdate(_state, usernameField, eventType) {
   switch (eventType) {
     case "KEY_PRESS":
       var content = usernameField.getText();

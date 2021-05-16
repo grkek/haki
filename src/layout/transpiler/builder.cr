@@ -8,6 +8,7 @@ module Layout
     class Builder
       property application : Gtk::Application?
       property window : Gtk::ApplicationWindow?
+      property elements = {} of String => Pointer(LibGtk::Widget)
       property components = {} of String => Pointer(LibGtk::Widget)
 
       def build_from_document(document)
@@ -21,20 +22,169 @@ module Layout
             )
 
             @application.try(&.on_activate do
-              get_element_by_id_proc = ->(class_id : String) {
-                @components[class_id].as(Pointer(LibGtk::Widget))
+              get_element_by_class_id_proc = ->(class_id : String) {
+                @elements[class_id].as(Pointer(LibGtk::Widget))
+              }
+
+              get_element_by_id_proc = ->(id : String) {
+                @components[id].as(Pointer(LibGtk::Widget))
               }
 
               context = Layout::Js::Engine::INSTANCE.runtime.context
 
               context.push_heap_stash
-              context.push_pointer(::Box.box(get_element_by_id_proc))
+              context.push_pointer(::Box.box(get_element_by_class_id_proc))
               context.put_prop_string(-2, "getElementByClassIdClosure")
 
               context.push_global_proc("getElementByClassId", 1) do |ptr|
                 env = Duktape::Sandbox.new(ptr)
                 env.push_heap_stash
                 env.get_prop_string(-1, "getElementByClassIdClosure")
+                function = ::Box(Proc(String, Pointer(LibGtk::Widget))).unbox(env.get_pointer(-1))
+                component_id = env.get_string(0).not_nil!
+                pointer = function.call(component_id)
+                widget = pointer.as(Gtk::Widget)
+
+                set_opacity_proc = ->(opacity : Float64) { widget.opacity = opacity }
+                set_visibility_proc = ->(visible : Bool) { widget.visible = visible }
+                set_foreground_color_proc = ->(r : Float64, g : Float64, b : Float64, a : Float64) { widget.override_color(Gtk::StateFlags::NORMAL, Gdk::RGBA.new(r, g, b, a)) }
+                set_background_color_proc = ->(r : Float64, g : Float64, b : Float64, a : Float64) { widget.override_background_color(Gtk::StateFlags::NORMAL, Gdk::RGBA.new(r, g, b, a)) }
+
+                begin
+                  set_text_proc = ->(text : String) { widget.as(Gtk::Entry).text = text }
+                rescue
+                  set_text_proc = ->(text : String) { widget.as(Gtk::Label).text = text }
+                end
+
+                begin
+                  get_text_proc = ->{ widget.as(Gtk::Entry).text }
+                rescue
+                  get_text_proc = ->{ widget.as(Gtk::Label).text }
+                end
+
+                env.push_heap_stash
+                env.push_pointer(::Box.box(set_opacity_proc))
+                env.put_prop_string(-2, "setOpacityClosure")
+
+                env.push_heap_stash
+                env.push_pointer(::Box.box(set_visibility_proc))
+                env.put_prop_string(-2, "setVisibilityClosure")
+
+                env.push_heap_stash
+                env.push_pointer(::Box.box(set_text_proc))
+                env.put_prop_string(-2, "setTextClosure")
+
+                env.push_heap_stash
+                env.push_pointer(::Box.box(get_text_proc))
+                env.put_prop_string(-2, "getTextClosure")
+
+                env.push_heap_stash
+                env.push_pointer(::Box.box(set_foreground_color_proc))
+                env.put_prop_string(-2, "setForegroundColorClosure")
+
+                env.push_heap_stash
+                env.push_pointer(::Box.box(set_background_color_proc))
+                env.put_prop_string(-2, "setBackgroundColorClosure")
+
+                idx = env.push_object
+
+                env.push_proc(1) do |ptr|
+                  sbx = Duktape::Sandbox.new(ptr)
+                  sbx.push_heap_stash
+                  sbx.get_prop_string(-1, "setOpacityClosure")
+                  proc = ::Box(Proc(Float64, Nil)).unbox(sbx.get_pointer(-1))
+                  opacity = sbx.get_number(0).not_nil!.as(Float64)
+                  proc.call(opacity)
+                  sbx.call_success
+                end
+
+                env.put_prop_string(-2, "setOpacity")
+
+                env.push_proc(1) do |ptr|
+                  sbx = Duktape::Sandbox.new(ptr)
+                  sbx.push_heap_stash
+                  sbx.get_prop_string(-1, "setVisibilityClosure")
+                  proc = ::Box(Proc(Bool, Nil)).unbox(sbx.get_pointer(-1))
+                  visible = sbx.get_boolean(0).not_nil!
+                  proc.call(visible)
+                  sbx.call_success
+                end
+
+                env.put_prop_string(-2, "setVisible")
+
+                env.push_proc(1) do |ptr|
+                  sbx = Duktape::Sandbox.new(ptr)
+                  sbx.push_heap_stash
+                  sbx.get_prop_string(-1, "setTextClosure")
+                  proc = ::Box(Proc(String, Nil)).unbox(sbx.get_pointer(-1))
+                  text = sbx.get_string(0).not_nil!
+                  proc.call(text)
+                  sbx.call_success
+                end
+
+                env.put_prop_string(-2, "setText")
+
+                env.push_proc(1) do |ptr|
+                  sbx = Duktape::Sandbox.new(ptr)
+                  sbx.push_heap_stash
+                  sbx.get_prop_string(-1, "getTextClosure")
+                  proc = ::Box(Proc(String)).unbox(sbx.get_pointer(-1))
+                  sbx.push_string(proc.call)
+                  sbx.call_success
+                end
+
+                env.put_prop_string(-2, "getText")
+
+                env.push_proc(4) do |ptr|
+                  sbx = Duktape::Sandbox.new(ptr)
+                  sbx.push_heap_stash
+                  sbx.get_prop_string(-1, "setForegroundColorClosure")
+                  proc = ::Box(Proc(Float64, Float64, Float64, Float64, Nil)).unbox(sbx.get_pointer(-1))
+
+                  r = sbx.get_number(0).not_nil!
+                  g = sbx.get_number(1).not_nil!
+                  b = sbx.get_number(2).not_nil!
+                  a = sbx.get_number(3).not_nil!
+
+                  proc.call(r.to_f64, g.to_f64, b.to_f64, a.to_f64)
+                  sbx.call_success
+                end
+
+                env.put_prop_string(-2, "setForegroundColor")
+
+                env.push_proc(4) do |ptr|
+                  sbx = Duktape::Sandbox.new(ptr)
+                  sbx.push_heap_stash
+                  sbx.get_prop_string(-1, "setBackgroundColorClosure")
+                  proc = ::Box(Proc(Float64, Float64, Float64, Float64, Nil)).unbox(sbx.get_pointer(-1))
+
+                  r = sbx.get_number(0).not_nil!
+                  g = sbx.get_number(1).not_nil!
+                  b = sbx.get_number(2).not_nil!
+                  a = sbx.get_number(2).not_nil!
+
+                  proc.call(r.to_f64, g.to_f64, b.to_f64, a.to_f64)
+                  sbx.call_success
+                end
+
+                env.put_prop_string(-2, "setBackgroundColor")
+
+                env.push_number(widget.opacity)
+                env.put_prop_string(idx, "opacity")
+
+                env.push_boolean(widget.visible)
+                env.put_prop_string(idx, "visible")
+                env.call_success
+              end
+
+              context.push_heap_stash
+              context.push_pointer(::Box.box(get_element_by_id_proc))
+              context.put_prop_string(-2, "getElementByIdClosure")
+
+              context.push_global_proc("getElementById", 1) do |ptr|
+                env = Duktape::Sandbox.new(ptr)
+                env.push_heap_stash
+                env.get_prop_string(-1, "getElementByIdClosure")
                 function = ::Box(Proc(String, Pointer(LibGtk::Widget))).unbox(env.get_pointer(-1))
                 component_id = env.get_string(0).not_nil!
                 pointer = function.call(component_id)
@@ -213,7 +363,13 @@ module Layout
               end
 
               structure.as(Element).on_component_did_mount
-              build_components(structure)
+
+              # Do a little benchmark of how long it takes to build
+              # the structure.
+              puts "Building components..."
+              elapsed_time = Time.measure { build_components(structure) }
+              puts "Finished. #{elapsed_text(elapsed_time)}"
+
               @window.try(&.show_all)
             end)
           else
@@ -221,6 +377,13 @@ module Layout
             raise "The first component must always be an application."
           end
         end
+      end
+
+      private def elapsed_text(elapsed)
+        millis = elapsed.total_milliseconds
+        return "#{millis.round(2)}ms" if millis >= 1
+
+        "#{(millis * 1000).round(2)}µs"
       end
 
       private def to_align(str : String) : Gtk::Align
@@ -300,7 +463,11 @@ module Layout
           end
 
           if class_id = child.attributes["classId"]?
-            @components[class_id] = button.as(Pointer(LibGtk::Widget))
+            @elements[class_id] = button.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = button.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -388,7 +555,11 @@ module Layout
           end
 
           if class_id = child.attributes["classId"]?
-            @components[class_id] = entry.as(Pointer(LibGtk::Widget))
+            @elements[class_id] = entry.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = entry.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -441,7 +612,11 @@ module Layout
           end
 
           if class_id = child.attributes["classId"]?
-            @components[class_id] = switch.as(Pointer(LibGtk::Widget))
+            @elements[class_id] = switch.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = switch.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -512,7 +687,11 @@ module Layout
           end
 
           if class_id = child.attributes["classId"]?
-            @components[class_id] = image.as(Pointer(LibGtk::Widget))
+            @elements[class_id] = image.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = image.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -542,7 +721,7 @@ module Layout
           text = child.children[0].as(Text).data.to_s
           horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
           vertical_align = to_align(child.attributes["verticalAlign"]? || "")
-          label = Gtk::Label.new(name: id, label: text, halign: horizontal_align, valign: vertical_align)
+          label = Gtk::Label.new(name: id, label: text, halign: horizontal_align, valign: vertical_align, wrap: true)
 
           box_expand = child.attributes["boxExpand"]? || "false"
           box_fill = child.attributes["boxFill"]? || "false"
@@ -553,7 +732,11 @@ module Layout
           end
 
           if class_id = child.attributes["classId"]?
-            @components[class_id] = label.as(Pointer(LibGtk::Widget))
+            @elements[class_id] = label.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = label.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -598,7 +781,11 @@ module Layout
           end
 
           if class_id = child.attributes["classId"]?
-            @components[class_id] = tab.as(Pointer(LibGtk::Widget))
+            @elements[class_id] = tab.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = tab.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -663,7 +850,11 @@ module Layout
           end
 
           if class_id = child.attributes["classId"]?
-            @components[class_id] = box.as(Pointer(LibGtk::Widget))
+            @elements[class_id] = box.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = box.as(Pointer(LibGtk::Widget))
           end
 
           case widget
@@ -766,8 +957,14 @@ module Layout
             end
 
             if class_id = child.attributes["classId"]?
-              @components[class_id] = @window.not_nil!.as(Pointer(LibGtk::Widget))
+              @elements[class_id] = @window.not_nil!.as(Pointer(LibGtk::Widget))
             end
+
+            if id = child.attributes["id"]?
+              @components[id] = @window.not_nil!.as(Pointer(LibGtk::Widget))
+            end
+
+            @window.not_nil!.position = Gtk::WindowPosition::CENTER_ALWAYS
 
             child.on_component_did_mount
             add_class_to_css(@window.not_nil!, class_name)
