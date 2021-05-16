@@ -494,7 +494,7 @@ module Layout
         when TextInput
           id = child.attributes["id"]? || nil
           class_name = child.attributes["class"]? || nil
-          label = child.attributes["label"]? || nil
+          label = child.attributes["value"]? || nil
           placeholder = child.attributes["placeholder"]? || nil
           text_changed = child.attributes["onChangeText"]? || nil
           cut_clipboard = child.attributes["onCut"]? || nil
