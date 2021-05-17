@@ -50,17 +50,21 @@ module Layout
                 set_foreground_color_proc = ->(r : Float64, g : Float64, b : Float64, a : Float64) { widget.override_color(Gtk::StateFlags::NORMAL, Gdk::RGBA.new(r, g, b, a)) }
                 set_background_color_proc = ->(r : Float64, g : Float64, b : Float64, a : Float64) { widget.override_background_color(Gtk::StateFlags::NORMAL, Gdk::RGBA.new(r, g, b, a)) }
 
-                begin
-                  set_text_proc = ->(text : String) { widget.as(Gtk::Entry).text = text }
-                rescue
-                  set_text_proc = ->(text : String) { widget.as(Gtk::Label).text = text }
-                end
+                set_text_proc = ->(text : String) {
+                  begin
+                    widget.as(Gtk::Entry).text = text
+                  rescue
+                    widget.as(Gtk::Label).text = text
+                  end
+                }
 
-                begin
-                  get_text_proc = ->{ widget.as(Gtk::Entry).text }
-                rescue
-                  get_text_proc = ->{ widget.as(Gtk::Label).text }
-                end
+                get_text_proc = ->{
+                  begin
+                    widget.as(Gtk::Entry).text
+                  rescue
+                    widget.as(Gtk::Label).text
+                  end
+                }
 
                 env.push_heap_stash
                 env.push_pointer(::Box.box(set_opacity_proc))
@@ -195,17 +199,21 @@ module Layout
                 set_foreground_color_proc = ->(r : Float64, g : Float64, b : Float64, a : Float64) { widget.override_color(Gtk::StateFlags::NORMAL, Gdk::RGBA.new(r, g, b, a)) }
                 set_background_color_proc = ->(r : Float64, g : Float64, b : Float64, a : Float64) { widget.override_background_color(Gtk::StateFlags::NORMAL, Gdk::RGBA.new(r, g, b, a)) }
 
-                begin
-                  set_text_proc = ->(text : String) { widget.as(Gtk::Entry).text = text }
-                rescue
-                  set_text_proc = ->(text : String) { widget.as(Gtk::Label).text = text }
-                end
+                set_text_proc = ->(text : String) {
+                  begin
+                    widget.as(Gtk::Entry).text = text
+                  rescue
+                    widget.as(Gtk::Label).text = text
+                  end
+                }
 
-                begin
-                  get_text_proc = ->{ widget.as(Gtk::Entry).text }
-                rescue
-                  get_text_proc = ->{ widget.as(Gtk::Label).text }
-                end
+                get_text_proc = ->{
+                  begin
+                    widget.as(Gtk::Entry).text
+                  rescue
+                    widget.as(Gtk::Label).text
+                  end
+                }
 
                 env.push_heap_stash
                 env.push_pointer(::Box.box(set_opacity_proc))
