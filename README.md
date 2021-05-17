@@ -13,6 +13,8 @@
 
 # Installation
 
+Before you clone the shard and build it, install the GTK libraries.
+
 ```bash
 git clone git@github.com:grkek/layout.git
 cd layout
@@ -22,7 +24,7 @@ shards install
 # Usage
 
 ```
-# The GTK_DEBUG environment constant spawns a sepparate window
+# The GTK_DEBUG environment constant spawns a separate window
 # with which you can debug UI elements.
 GTK_DEBUG=interactive crystal run example/application.cr
 ```
