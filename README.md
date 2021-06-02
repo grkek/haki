@@ -1,6 +1,6 @@
 # Layout
 
-[![Showcase](https://s3.gifyu.com/images/layout.gif)](https://github.com/grkek/layout)
+[![Showcase](https://i.ibb.co/wdGhw8X/Screenshot-2021-06-02-at-20-31-51.png)](https://github.com/grkek/layout)
 
 **Notice:** This project is <ins>experimental</ins>.
 
