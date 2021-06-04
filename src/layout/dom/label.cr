@@ -10,26 +10,43 @@ module Layout
 
       def initialize(@attributes, @children)
         @kind = "Label"
+        substitution()
+      end
 
-        @attributes.map do |key, value|
-          matches = value.scan(/\${(.*?)}/)
+      def initialize_component(widget : Gtk::Widget, component_storage : Transpiler::ComponentStorage)
+        id = @attributes["id"]? || ""
+        class_name = @attributes["className"]? || nil
+        text = @children[0].as(Text).data.to_s
+        horizontal_align = to_align(@attributes["horizontalAlign"]? || "")
+        vertical_align = to_align(@attributes["verticalAlign"]? || "")
+        label = Gtk::Label.new(name: id, label: text, halign: horizontal_align, valign: vertical_align, wrap: true)
 
-          case matches.size
-          when 0
-            @attributes[key] = value
+        box_expand = @attributes["boxExpand"]? || "false"
+        box_fill = @attributes["boxFill"]? || "false"
+        box_padding = @attributes["boxPadding"]? || "0"
+
+        if box_padding.includes?(".0")
+          box_padding = box_padding[..box_padding.size - 3]
+        end
+
+        containerize(widget, label, box_expand, box_fill, box_padding)
+
+        label.on_event_after do |widget, event|
+          case event.event_type
+          when Gdk::EventType::MOTION_NOTIFY
+            false
           else
-            matches.each do |match|
-              hash = match.to_h
-
-              begin
-                @attributes[key] = value.gsub(hash[0].not_nil!, Layout::Js::Engine::INSTANCE.evaluate("__std__value_of__(#{hash[1].not_nil!})").to_s)
-              rescue ex : Exception
-                @attributes[key] = value
-                puts "An exception occured while evaluating a variable format routine: #{ex}"
-              end
-            end
+            did_update(@cid, event.event_type.to_s)
+            true
           end
         end
+
+        add_class_to_css(label, class_name)
+        component_storage.store(id, label)
+        component_storage.store(@cid, label)
+        did_mount(@cid)
+
+        label
       end
 
       def to_html : String
