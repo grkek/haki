@@ -3,13 +3,13 @@ require "./element"
 
 module Layout
   module Dom
-    class Application < Element
+    class TextView < Element
       @attributes : Hash(String, String)
 
       getter :attributes
 
       def initialize(@attributes, @children)
-        @kind = "Application"
+        @kind = "TextView"
 
         @attributes.map do |key, value|
           matches = value.scan(/\${(.*?)}/)

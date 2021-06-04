@@ -10,9 +10,13 @@ module Layout
             sbx.call_success
           end
 
-          context.eval_string! <<-JS
+          context.eval! <<-JS
             function print(args) {
               __std__puts__(JSON.stringify(args));
+            }
+
+            function __std__value_of__(value) {
+              return value;
             }
           JS
         end

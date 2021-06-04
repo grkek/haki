@@ -1,31 +1,80 @@
-<Application gid="com.example.layout">
-  <!--
-    StyleSheet tags define the style for the components.
-      - src: The location of the file.
-  -->
-  <StyleSheet src="./example/dist/styles/index.css" />
+<Application gid="com.grrkek.monkeyshoulder">
+  <StyleSheet src="./example/dist/styles/index.css"/>
+  <Script src="./example/dist/scripts/index.js"></Script>
 
-  <!--
-    Import tags define the custom elements imported from other HTML files.
-      - src: The location of the file.
-      - as: The component name exported from the file.
-  -->
-  <Import src="./example/dist/components/authorization.html" as="Authorization"/>
+  <Window class="main-window" title="${appConfiguration.window.title}" width="${appConfiguration.window.width}" height="${appConfiguration.window.height}">
+    <Box class="main-box" orientation="vertical">
+      <Box orientation="horizontal">
+        <Label class="main-label" boxExpand="true" boxFill="true" horizontalAlign="start">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        </Label>
+  
+        <Label class="main-label" boxExpand="true" boxFill="true" horizontalAlign="end">
+          Morbi varius odio quis metus ullamcorper porttitor.
+        </Label>
+      </Box>
 
-  <!--
-    Script tags define the JavaScript content of our GUI front-end.
-      - src: The location of the file.
-  -->
-  <Script src="./example/dist/scripts/index.js"/>
+      <Box orientation="horizontal">
+        <Label class="main-label" boxExpand="true" boxFill="true" horizontalAlign="fill">
+          Cras ac erat vitae libero pellentesque scelerisque.
+        </Label>
+  
+        <Label class="main-label" boxExpand="true" boxFill="true" horizontalAlign="fill">
+          Vestibulum dictum nisi quam, eget pharetra lorem lacinia in.
+        </Label>
+      </Box>
 
-  <Window id="mainWindow" class="mainWindow" title="Hello, World!" width="800" height="600">
-    <Box class="mainBox">
-      <Label class="mainLabel">
-        Hello, World!
-      </Label>
+      <HorizontalSeparator class="horizontal-separator"/>
 
-      <Authorization />
-      <Authorization />
+      <Box orientation="horizontal">
+        <TextInput class="main-text-input" placeholder="E-Mail" boxExpand="true" boxFill="true" horizontalAlign="fill"/>
+        <TextInput class="main-text-input" placeholder="Password" isPassword="true" boxExpand="true" boxFill="true" horizontalAlign="fill"/>
+      </Box>
+
+      <HorizontalSeparator class="horizontal-separator-number"/>
+
+      <Box orientation="horizontal">
+        <Button class="main-button" boxExpand="true" boxFill="true" horizontalAlign="fill">Button #1</Button>
+        <Button class="main-button" boxExpand="true" boxFill="true" horizontalAlign="fill">Button #2</Button>
+      </Box>
+
+      <HorizontalSeparator class="horizontal-separator"/>
+
+      <Box orientation="horizontal">
+        <Label class="main-label"> Am I useless?</Label>
+        <Switch class="main-switch" boxExpand="true" boxFill="true" horizontalAlign="end"/>
+
+        <Label class="main-label"> Am I usefull?</Label>
+        <Switch class="main-switch" boxExpand="true" boxFill="true" horizontalAlign="end"/>
+      </Box>
+
+      <HorizontalSeparator class="horizontal-separator-number"/>
+
+      <Box class="number-box" orientation="horizontal">
+        <TextInput onChangeText={updateNumberOne} class="number-text" boxExpand="true" boxFill="true" placeholder="Number 1" horizontalAlign="fill"/>
+        <TextInput onChangeText={updateNumberTwo} class="number-text" placeholder="Number 2" boxExpand="true" boxFill="true" horizontalAlign="fill"/>
+      </Box>
+
+      <HorizontalSeparator class="horizontal-separator-number"/>
+
+      <Box boxExpand="true" boxFill="true">
+        <Frame class="main-frame" value="Collection of Lorem ipsum" boxExpand="true" boxFill="true">
+          <ScrolledWindow class="main-scrolled-window">
+            <ListBox class="main-list-box">
+              <Label>1. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et mauris in nunc commodo ullamcorper sit amet non lectus. Quisque non fermentum dui. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam id massa eu leo consequat pellentesque id sed est. Vivamus maximus non ex sit amet ultricies. Maecenas vitae nulla ultricies, suscipit nunc ac, sollicitudin nisi.</Label>
+              <Label>2. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et mauris in nunc commodo ullamcorper sit amet non lectus. Quisque non fermentum dui. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam id massa eu leo consequat pellentesque id sed est. Vivamus maximus non ex sit amet ultricies. Maecenas vitae nulla ultricies, suscipit nunc ac, sollicitudin nisi.</Label>
+              <Label>3. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et mauris in nunc commodo ullamcorper sit amet non lectus. Quisque non fermentum dui. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam id massa eu leo consequat pellentesque id sed est. Vivamus maximus non ex sit amet ultricies. Maecenas vitae nulla ultricies, suscipit nunc ac, sollicitudin nisi.</Label>
+              <Label>4. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et mauris in nunc commodo ullamcorper sit amet non lectus. Quisque non fermentum dui. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam id massa eu leo consequat pellentesque id sed est. Vivamus maximus non ex sit amet ultricies. Maecenas vitae nulla ultricies, suscipit nunc ac, sollicitudin nisi.</Label>
+              <Label>5. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et mauris in nunc commodo ullamcorper sit amet non lectus. Quisque non fermentum dui. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam id massa eu leo consequat pellentesque id sed est. Vivamus maximus non ex sit amet ultricies. Maecenas vitae nulla ultricies, suscipit nunc ac, sollicitudin nisi.</Label>
+            </ListBox>
+          </ScrolledWindow>
+        </Frame>
+      </Box>
+      
+      <Box orientation="horizontal">
+        <Label id="numberOneLabel" class="main-label" boxExpand="true" boxFill="false" horizontalAlign="start">Number 1 TextEntry text!</Label>
+        <Label id="numberTwoLabel" class="main-label" boxExpand="true" boxFill="false" horizontalAlign="end">Number 2 TextEntry text!</Label>
+      </Box>
     </Box>
   </Window>
 </Application>

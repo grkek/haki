@@ -20,20 +20,13 @@ module Layout
               hash = match.to_h
 
               begin
-                @attributes[key] = value.gsub(hash[0].not_nil!, "#{Layout::Js::Engine::INSTANCE.evaluate(hash[1].not_nil!)}")
+                @attributes[key] = value.gsub(hash[0].not_nil!, Layout::Js::Engine::INSTANCE.evaluate("__std__value_of__(#{hash[1].not_nil!})").to_s)
               rescue ex : Exception
                 @attributes[key] = value
                 puts "An exception occured while evaluating a variable format routine: #{ex}"
               end
             end
           end
-        end
-
-        if id = @attributes["id"]?
-          Layout::Js::Engine::INSTANCE.evaluate(<<-JS
-            const #{id}State = #{self.to_json}
-          JS
-          )
         end
       end
 

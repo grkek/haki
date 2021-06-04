@@ -121,12 +121,19 @@ module Layout
             Layout::Dom::StyleSheet.new(attrs)
           when "Script"
             Layout::Dom::Script.new(attrs, children)
-
             nil
           when "TextInput"
             Layout::Dom::TextInput.new(attrs)
+          when "Spinner"
+            Layout::Dom::Spinner.new(attrs)
+          when "ProgressBar"
+            Layout::Dom::ProgressBar.new(attrs)
           when "Image"
             Layout::Dom::Image.new(attrs)
+          when "VerticalSeparator"
+            Layout::Dom::VerticalSeparator.new(attrs)
+          when "HorizontalSeparator"
+            Layout::Dom::HorizontalSeparator.new(attrs)
           when "Switch"
             Layout::Dom::Switch.new(attrs)
           else
@@ -142,12 +149,10 @@ module Layout
                       element.children[1].children.push(element.children.first)
                       child = element.children[1].as(Layout::Dom::Element)
                       child.attributes.merge!(attrs)
-                      child.on_component_did_mount
                       child
                     else
                       child = element.children.first.as(Layout::Dom::Element)
                       child.attributes.merge!(attrs)
-                      child.on_component_did_mount
                       child
                     end
                   else
@@ -182,8 +187,14 @@ module Layout
             Layout::Dom::Application.new(attrs, children)
           when "Window"
             Layout::Dom::Window.new(attrs, children)
+          when "Frame"
+            Layout::Dom::Frame.new(attrs, children)
           when "Box"
             Layout::Dom::Box.new(attrs, children)
+          when "ListBox"
+            Layout::Dom::ListBox.new(attrs, children)
+          when "ScrolledWindow"
+            Layout::Dom::ScrolledWindow.new(attrs, children)
           when "Tab"
             Layout::Dom::Tab.new(attrs, children)
           when "EventBox"
@@ -192,6 +203,8 @@ module Layout
             Layout::Dom::Button.new(attrs, children)
           when "Label"
             Layout::Dom::Label.new(attrs, children)
+          when "TextView"
+            Layout::Dom::TextView.new(attrs, children)
           when "Export"
             Layout::Dom::Export.new(attrs, children)
           else

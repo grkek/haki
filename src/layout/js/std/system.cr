@@ -15,7 +15,7 @@ module Layout
             sbx.call_success
           end
 
-          context.eval_string! <<-JS
+          context.eval! <<-JS
             const system = {
               getCpuCount : function () {
                 return __std__cpu_count__();

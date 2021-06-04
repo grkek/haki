@@ -5,6 +5,8 @@ module Layout
   module Transpiler
     include Layout::Dom
 
+    MAX_LIST_BOX_SIZE = 1000000 # A quick hack around the NULL pointer error to avoid messy orders.
+
     class Builder
       property application : Gtk::Application?
       property window : Gtk::ApplicationWindow?
@@ -330,46 +332,6 @@ module Layout
                 env.call_success
               end
 
-              context.push_heap_stash
-              context.push_pointer(::Box.box(get_element_by_id_proc))
-              context.put_prop_string(-2, "setElementOpacityByIdClosure")
-
-              context.push_global_proc("setElementOpacityById", 2) do |ptr|
-                env = Duktape::Sandbox.new(ptr)
-                env.push_heap_stash
-                env.get_prop_string(-1, "setElementOpacityByIdClosure")
-                function = ::Box(Proc(String, Pointer(LibGtk::Widget))).unbox(env.get_pointer(-1))
-                component_id = env.get_string(0).not_nil!
-                component_value = env.get_number(1).not_nil!.as(Float64)
-                widget = function.call(component_id)
-                idx = env.push_object
-                widget = widget.as(Gtk::Widget)
-
-                widget.opacity = component_value
-
-                env.call_success
-              end
-
-              context.push_heap_stash
-              context.push_pointer(::Box.box(get_element_by_id_proc))
-              context.put_prop_string(-2, "setElementVisibilityByIdClosure")
-
-              context.push_global_proc("setElementVisibilityById", 2) do |ptr|
-                env = Duktape::Sandbox.new(ptr)
-                env.push_heap_stash
-                env.get_prop_string(-1, "setElementVisibilityByIdClosure")
-                function = ::Box(Proc(String, Pointer(LibGtk::Widget))).unbox(env.get_pointer(-1))
-                component_id = env.get_string(0).not_nil!
-                component_value = env.get_boolean(1).not_nil!
-                widget = function.call(component_id)
-                idx = env.push_object
-                widget = widget.as(Gtk::Widget)
-
-                widget.visible = component_value
-
-                env.call_success
-              end
-
               structure.as(Element).on_component_did_mount
 
               # Do a little benchmark of how long it takes to build
@@ -377,12 +339,11 @@ module Layout
               puts "Building components..."
               elapsed_time = Time.measure { build_components(structure) }
               puts "Finished. #{elapsed_text(elapsed_time)}"
-
               @window.try(&.show_all)
             end)
           else
             # TODO: Refactor this later to an actual error message.
-            raise "The first component must always be an application."
+            raise "The first component always must be an application."
           end
         end
       end
@@ -426,8 +387,23 @@ module Layout
         end
       end
 
+      private def containerize(widget, component, box_expand, box_fill, box_padding)
+        case widget
+        when Gtk::Notebook
+          widget.append_page(component, nil)
+        when Gtk::Box
+          widget.pack_start(component, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
+        when Gtk::ScrolledWindow, Gtk::Frame
+          widget.add(component)
+        when Gtk::ListBox
+          widget.insert(component, MAX_LIST_BOX_SIZE)
+        when Gtk::ApplicationWindow
+          widget.add(component)
+        end
+      end
+
       # ameba:disable Metrics/CyclomaticComplexity
-      private def build_widget(child, widget : Gtk::Widget)
+      private def transpile_component(child, widget : Gtk::Widget)
         case child
         when Text
         else
@@ -478,14 +454,7 @@ module Layout
             @components[id] = button.as(Pointer(LibGtk::Widget))
           end
 
-          case widget
-          when Gtk::Notebook
-            widget.append_page(button, nil)
-          when Gtk::Box
-            widget.pack_start(button, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
-          when Gtk::ApplicationWindow
-            widget.add(button)
-          end
+          containerize(widget, button, box_expand, box_fill, box_padding)
 
           button.on_event_after do |widget, event|
             case event.event_type
@@ -516,6 +485,7 @@ module Layout
           password_char = child.attributes["passwordCharacter"]? || nil
           visibility = to_bool(child.attributes["isPassword"]? || "false") ? false : true
           invisible_char = password_char.try(&.bytes.first.to_u32)
+
           entry = Gtk::Entry.new(name: id, text: label, placeholder_text: placeholder, invisible_char: invisible_char, visibility: visibility, halign: horizontal_align, valign: vertical_align)
 
           entry.buffer.on_inserted_text do |buffer|
@@ -570,14 +540,7 @@ module Layout
             @components[id] = entry.as(Pointer(LibGtk::Widget))
           end
 
-          case widget
-          when Gtk::Notebook
-            widget.append_page(entry, nil)
-          when Gtk::Box
-            widget.pack_start(entry, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
-          when Gtk::ApplicationWindow
-            widget.add(entry)
-          end
+          containerize(widget, entry, box_expand, box_fill, box_padding)
 
           entry.on_event_after do |widget, event|
             case event.event_type
@@ -627,14 +590,7 @@ module Layout
             @components[id] = switch.as(Pointer(LibGtk::Widget))
           end
 
-          case widget
-          when Gtk::Notebook
-            widget.append_page(switch, nil)
-          when Gtk::Box
-            widget.pack_start(switch, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
-          when Gtk::ApplicationWindow
-            widget.add(switch)
-          end
+          containerize(widget, switch, box_expand, box_fill, box_padding)
 
           switch.on_event_after do |widget, event|
             case event.event_type
@@ -702,14 +658,7 @@ module Layout
             @components[id] = image.as(Pointer(LibGtk::Widget))
           end
 
-          case widget
-          when Gtk::Notebook
-            widget.append_page(image, nil)
-          when Gtk::Box
-            widget.pack_start(image, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
-          when Gtk::ApplicationWindow
-            widget.add(image)
-          end
+          containerize(widget, image, box_expand, box_fill, box_padding)
 
           image.on_event_after do |widget, event|
             case event.event_type
@@ -747,14 +696,7 @@ module Layout
             @components[id] = label.as(Pointer(LibGtk::Widget))
           end
 
-          case widget
-          when Gtk::Notebook
-            widget.append_page(label, nil)
-          when Gtk::Box
-            widget.pack_start(label, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
-          when Gtk::ApplicationWindow
-            widget.add(label)
-          end
+          containerize(widget, label, box_expand, box_fill, box_padding)
 
           label.on_event_after do |widget, event|
             case event.event_type
@@ -768,6 +710,45 @@ module Layout
 
           add_class_to_css(label, class_name)
           child.on_component_did_mount
+        when TextView
+          id = child.attributes["id"]? || nil
+          class_name = child.attributes["class"]? || nil
+          text = child.children[0].as(Text).data.to_s
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+          text_view = Gtk::TextView.new(name: id, halign: horizontal_align, valign: vertical_align)
+          text_view.buffer.set_text(text, text.size)
+
+          box_expand = child.attributes["boxExpand"]? || "false"
+          box_fill = child.attributes["boxFill"]? || "false"
+          box_padding = child.attributes["boxPadding"]? || "0"
+
+          if box_padding.includes?(".0")
+            box_padding = box_padding[..box_padding.size - 3]
+          end
+
+          if class_id = child.attributes["classId"]?
+            @elements[class_id] = text_view.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = text_view.as(Pointer(LibGtk::Widget))
+          end
+
+          containerize(widget, text_view, box_expand, box_fill, box_padding)
+
+          text_view.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          add_class_to_css(text_view, class_name)
+          child.on_component_did_mount
         when Tab
           id = child.attributes["id"]? || nil
           class_name = child.attributes["class"]? || nil
@@ -777,7 +758,7 @@ module Layout
           tab = Gtk::Notebook.new(name: id, halign: horizontal_align, valign: vertical_align)
 
           child.children.each do |subchild|
-            build_widget(subchild, tab)
+            transpile_component(subchild, tab)
           end
 
           box_expand = child.attributes["boxExpand"]? || "false"
@@ -796,14 +777,7 @@ module Layout
             @components[id] = tab.as(Pointer(LibGtk::Widget))
           end
 
-          case widget
-          when Gtk::Notebook
-            widget.append_page(tab, nil)
-          when Gtk::Box
-            widget.pack_start(tab, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
-          when Gtk::ApplicationWindow
-            widget.add(tab)
-          end
+          containerize(widget, tab, box_expand, box_fill, box_padding)
 
           tab.on_event_after do |widget, event|
             case event.event_type
@@ -844,7 +818,7 @@ module Layout
           box = Gtk::Box.new(name: id, orientation: orientation, spacing: spacing.to_i, halign: horizontal_align, valign: vertical_align)
 
           child.children.each do |subchild|
-            build_widget(subchild, box)
+            transpile_component(subchild, box)
           end
 
           box.on_event_after do |widget, event|
@@ -865,16 +839,318 @@ module Layout
             @components[id] = box.as(Pointer(LibGtk::Widget))
           end
 
-          case widget
-          when Gtk::Notebook
-            widget.append_page(box, nil)
-          when Gtk::Box
-            widget.pack_start(box, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
-          when Gtk::ApplicationWindow
-            widget.add(box)
-          end
+          containerize(widget, box, box_expand, box_fill, box_padding)
 
           add_class_to_css(box, class_name)
+          child.on_component_did_mount
+        when Frame
+          id = child.attributes["id"]? || nil
+          class_name = child.attributes["class"]? || nil
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+          value = child.attributes["value"]? || ""
+          box_expand = child.attributes["boxExpand"]? || "false"
+          box_fill = child.attributes["boxFill"]? || "false"
+          box_padding = child.attributes["boxPadding"]? || "0"
+
+          if box_padding.includes?(".0")
+            box_padding = box_padding[..box_padding.size - 3]
+          end
+
+          spacing = child.attributes["spacing"]? || "2"
+
+          frame = Gtk::Frame.new(name: id, label: value, halign: horizontal_align, valign: vertical_align)
+
+          child.children.each do |subchild|
+            transpile_component(subchild, frame)
+          end
+
+          frame.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          if class_id = child.attributes["classId"]?
+            @elements[class_id] = frame.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = frame.as(Pointer(LibGtk::Widget))
+          end
+
+          containerize(widget, frame, box_expand, box_fill, box_padding)
+
+          add_class_to_css(frame, class_name)
+          child.on_component_did_mount
+        when ScrolledWindow
+          id = child.attributes["id"]? || nil
+          class_name = child.attributes["class"]? || nil
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+          box_expand = child.attributes["boxExpand"]? || "false"
+          box_fill = child.attributes["boxFill"]? || "false"
+          box_padding = child.attributes["boxPadding"]? || "0"
+
+          if box_padding.includes?(".0")
+            box_padding = box_padding[..box_padding.size - 3]
+          end
+
+          spacing = child.attributes["spacing"]? || "2"
+
+          scrolled_window = Gtk::ScrolledWindow.new(name: id, halign: horizontal_align, valign: vertical_align)
+
+          child.children.each do |subchild|
+            transpile_component(subchild, scrolled_window)
+          end
+
+          scrolled_window.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          if class_id = child.attributes["classId"]?
+            @elements[class_id] = scrolled_window.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = scrolled_window.as(Pointer(LibGtk::Widget))
+          end
+
+          containerize(widget, scrolled_window, box_expand, box_fill, box_padding)
+
+          add_class_to_css(scrolled_window, class_name)
+          child.on_component_did_mount
+        when VerticalSeparator
+          id = child.attributes["id"]? || nil
+          class_name = child.attributes["class"]? || nil
+
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+
+          vertical_separator = Gtk::Separator.new(name: id, orientation: Gtk::Orientation::VERTICAL, halign: horizontal_align, valign: vertical_align)
+
+          box_expand = child.attributes["boxExpand"]? || "false"
+          box_fill = child.attributes["boxFill"]? || "false"
+          box_padding = child.attributes["boxPadding"]? || "0"
+
+          if box_padding.includes?(".0")
+            box_padding = box_padding[..box_padding.size - 3]
+          end
+
+          if class_id = child.attributes["classId"]?
+            @elements[class_id] = vertical_separator.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = vertical_separator.as(Pointer(LibGtk::Widget))
+          end
+
+          containerize(widget, vertical_separator, box_expand, box_fill, box_padding)
+
+          vertical_separator.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          add_class_to_css(vertical_separator, class_name)
+          child.on_component_did_mount
+        when HorizontalSeparator
+          id = child.attributes["id"]? || nil
+          class_name = child.attributes["class"]? || nil
+
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+
+          horizontal_separator = Gtk::Separator.new(name: id, orientation: Gtk::Orientation::HORIZONTAL, halign: horizontal_align, valign: vertical_align)
+
+          box_expand = child.attributes["boxExpand"]? || "false"
+          box_fill = child.attributes["boxFill"]? || "false"
+          box_padding = child.attributes["boxPadding"]? || "0"
+
+          if box_padding.includes?(".0")
+            box_padding = box_padding[..box_padding.size - 3]
+          end
+
+          if class_id = child.attributes["classId"]?
+            @elements[class_id] = horizontal_separator.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = horizontal_separator.as(Pointer(LibGtk::Widget))
+          end
+
+          containerize(widget, horizontal_separator, box_expand, box_fill, box_padding)
+
+          horizontal_separator.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          add_class_to_css(horizontal_separator, class_name)
+          child.on_component_did_mount
+        when ListBox
+          id = child.attributes["id"]? || nil
+          class_name = child.attributes["class"]? || nil
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+          case child.attributes["orientation"]?
+          when "vertical"
+            orientation = Gtk::Orientation::VERTICAL
+          when "horizontal"
+            orientation = Gtk::Orientation::HORIZONTAL
+          else
+            orientation = Gtk::Orientation::VERTICAL
+          end
+
+          box_expand = child.attributes["boxExpand"]? || "false"
+          box_fill = child.attributes["boxFill"]? || "false"
+          box_padding = child.attributes["boxPadding"]? || "0"
+
+          if box_padding.includes?(".0")
+            box_padding = box_padding[..box_padding.size - 3]
+          end
+
+          spacing = child.attributes["spacing"]? || "2"
+
+          list_box = Gtk::ListBox.new(name: id, halign: horizontal_align, valign: vertical_align)
+
+          child.children.each do |subchild|
+            transpile_component(subchild, list_box)
+          end
+
+          list_box.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          if class_id = child.attributes["classId"]?
+            @elements[class_id] = list_box.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = list_box.as(Pointer(LibGtk::Widget))
+          end
+
+          containerize(widget, list_box, box_expand, box_fill, box_padding)
+
+          add_class_to_css(list_box, class_name)
+          child.on_component_did_mount
+        when Spinner
+          id = child.attributes["id"]? || nil
+          class_name = child.attributes["class"]? || nil
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+
+          spinner = Gtk::Spinner.new(
+            name: id,
+            halign: horizontal_align,
+            valign: vertical_align,
+            active: true
+          )
+
+          box_expand = child.attributes["boxExpand"]? || "false"
+          box_fill = child.attributes["boxFill"]? || "false"
+          box_padding = child.attributes["boxPadding"]? || "0"
+
+          if box_padding.includes?(".0")
+            box_padding = box_padding[..box_padding.size - 3]
+          end
+
+          if class_id = child.attributes["classId"]?
+            @elements[class_id] = spinner.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = spinner.as(Pointer(LibGtk::Widget))
+          end
+
+          containerize(widget, spinner, box_expand, box_fill, box_padding)
+
+          spinner.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          add_class_to_css(spinner, class_name)
+          child.on_component_did_mount
+        when ProgressBar
+          id = child.attributes["id"]? || nil
+          class_name = child.attributes["class"]? || nil
+
+          value = child.attributes["value"]? || ""
+          inverted = to_bool(child.attributes["inverted"]? || "false")
+
+          horizontal_align = to_align(child.attributes["horizontalAlign"]? || "")
+          vertical_align = to_align(child.attributes["verticalAlign"]? || "")
+
+          progress_bar = Gtk::ProgressBar.new(
+            name: id,
+            text: value,
+            inverted: inverted,
+            show_text: value.size != 0,
+            halign: horizontal_align,
+            valign: vertical_align
+          )
+
+          box_expand = child.attributes["boxExpand"]? || "false"
+          box_fill = child.attributes["boxFill"]? || "false"
+          box_padding = child.attributes["boxPadding"]? || "0"
+
+          if box_padding.includes?(".0")
+            box_padding = box_padding[..box_padding.size - 3]
+          end
+
+          if class_id = child.attributes["classId"]?
+            @elements[class_id] = progress_bar.as(Pointer(LibGtk::Widget))
+          end
+
+          if id = child.attributes["id"]?
+            @components[id] = progress_bar.as(Pointer(LibGtk::Widget))
+          end
+
+          containerize(widget, progress_bar, box_expand, box_fill, box_padding)
+
+          progress_bar.on_event_after do |widget, event|
+            case event.event_type
+            when Gdk::EventType::MOTION_NOTIFY
+              false
+            else
+              child.on_component_did_update(child.attributes["classId"], event.event_type.to_s)
+              true
+            end
+          end
+
+          add_class_to_css(progress_bar, class_name)
           child.on_component_did_mount
         when EventBox
           nil
@@ -895,11 +1171,11 @@ module Layout
       end
 
       # ameba:disable Metrics/CyclomaticComplexity
-      private def build_widgets(parent, widget : Gtk::Widget)
+      private def transpile_components(parent, widget : Gtk::Widget)
         recursive_stylesheet_processing(parent)
 
         parent.children.each do |child|
-          build_widget(child, widget.not_nil!)
+          transpile_component(child, widget.not_nil!)
         end
       end
 
@@ -976,7 +1252,7 @@ module Layout
 
             child.on_component_did_mount
             add_class_to_css(@window.not_nil!, class_name)
-            build_widgets(child, @window.not_nil!)
+            transpile_components(child, @window.not_nil!)
           else
             # TODO: Handle other non-crucial parts.
           end
