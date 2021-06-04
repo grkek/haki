@@ -10,7 +10,7 @@ module Layout
             sbx.call_success
           end
 
-          context.eval_string! <<-JS
+          context.eval! <<-JS
             const process = {
               exit : function (exitCode) {
                 __std__exit__(exitCode);

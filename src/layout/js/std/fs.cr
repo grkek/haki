@@ -36,7 +36,7 @@ module Layout
             sbx.call_success
           end
 
-          context.eval_string! <<-JS
+          context.eval! <<-JS
             const fs = {
               readFile : function (filePath) {
                 return __std__read_file__(filePath);

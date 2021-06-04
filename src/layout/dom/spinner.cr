@@ -3,13 +3,14 @@ require "./element"
 
 module Layout
   module Dom
-    class Application < Element
+    class Spinner < Element
       @attributes : Hash(String, String)
 
       getter :attributes
 
-      def initialize(@attributes, @children)
-        @kind = "Application"
+      def initialize(@attributes)
+        @kind = "Spinner"
+        @children = [] of Node
 
         @attributes.map do |key, value|
           matches = value.scan(/\${(.*?)}/)
