@@ -9,6 +9,10 @@ module Layout
       getter :attributes
 
       def initialize(@kind, @attributes, @children = [] of Node)
+        substitution()
+      end
+
+      def substitution
         @attributes.map do |key, value|
           matches = value.scan(/\${(.*?)}/)
 
