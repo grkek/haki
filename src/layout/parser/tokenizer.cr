@@ -212,7 +212,6 @@ module Layout
               child = custom_components[tag_name].as(Layout::Dom::Element)
               child.attributes.merge!(attrs)
               child.children.concat(children)
-              child.on_component_did_mount
               child
             else
               raise Exceptions::InvalidElementException.new(tag_name, @position)

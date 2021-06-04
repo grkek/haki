@@ -1,3 +1,7 @@
+.main-window {
+  background-color: black;
+}
+
 .main-box {
   transition: all 1s ease;
   background-color: rgb(28, 30, 39);

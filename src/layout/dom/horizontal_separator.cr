@@ -14,6 +14,43 @@ module Layout
         substitution()
       end
 
+      def initialize_component(widget : Gtk::Widget, component_storage : Transpiler::ComponentStorage)
+        id = @attributes["id"]? || ""
+        class_name = @attributes["className"]? || nil
+
+        horizontal_align = to_align(@attributes["horizontalAlign"]? || "")
+        vertical_align = to_align(@attributes["verticalAlign"]? || "")
+
+        horizontal_separator = Gtk::Separator.new(name: id, orientation: Gtk::Orientation::HORIZONTAL, halign: horizontal_align, valign: vertical_align)
+
+        box_expand = @attributes["boxExpand"]? || "false"
+        box_fill = @attributes["boxFill"]? || "false"
+        box_padding = @attributes["boxPadding"]? || "0"
+
+        if box_padding.includes?(".0")
+          box_padding = box_padding[..box_padding.size - 3]
+        end
+
+        containerize(widget, horizontal_separator, box_expand, box_fill, box_padding)
+
+        horizontal_separator.on_event_after do |widget, event|
+          case event.event_type
+          when Gdk::EventType::MOTION_NOTIFY
+            false
+          else
+            did_update(@cid, event.event_type.to_s)
+            true
+          end
+        end
+
+        add_class_to_css(horizontal_separator, class_name)
+        component_storage.store(id, horizontal_separator)
+        component_storage.store(@cid, horizontal_separator)
+        did_mount(@cid)
+
+        horizontal_separator
+      end
+
       def to_html : String
         attrs = attributes.map do |key, value|
           "#{key}='#{value}'"
