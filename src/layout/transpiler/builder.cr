@@ -213,7 +213,6 @@ module Layout
         "#{(millis * 1000).round(2)}µs"
       end
 
-      # ameba:disable Metrics/CyclomaticComplexity
       private def transpile_component(child, widget : Gtk::Widget)
         case child
         when Box, Frame, Tab, ListBox, ScrolledWindow
