@@ -16,14 +16,6 @@ module Layout
         class_name = @attributes["className"]? || nil
         horizontal_align = to_align(@attributes["horizontalAlign"]? || "")
         vertical_align = to_align(@attributes["verticalAlign"]? || "")
-        case @attributes["orientation"]?
-        when "vertical"
-          orientation = Gtk::Orientation::VERTICAL
-        when "horizontal"
-          orientation = Gtk::Orientation::HORIZONTAL
-        else
-          orientation = Gtk::Orientation::VERTICAL
-        end
 
         box_expand = @attributes["boxExpand"]? || "false"
         box_fill = @attributes["boxFill"]? || "false"
@@ -33,11 +25,9 @@ module Layout
           box_padding = box_padding[..box_padding.size - 3]
         end
 
-        spacing = @attributes["spacing"]? || "2"
-
         list_box = Gtk::ListBox.new(name: id, halign: horizontal_align, valign: vertical_align)
 
-        list_box.on_event_after do |widget, event|
+        list_box.on_event_after do |_widget, event|
           case event.event_type
           when Gdk::EventType::MOTION_NOTIFY
             false
@@ -48,7 +38,6 @@ module Layout
         end
 
         containerize(widget, list_box, box_expand, box_fill, box_padding)
-
         add_class_to_css(list_box, class_name)
         component_storage.store(id, list_box)
         component_storage.store(@cid, list_box)

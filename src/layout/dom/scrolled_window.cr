@@ -24,11 +24,9 @@ module Layout
           box_padding = box_padding[..box_padding.size - 3]
         end
 
-        spacing = @attributes["spacing"]? || "2"
-
         scrolled_window = Gtk::ScrolledWindow.new(name: id, halign: horizontal_align, valign: vertical_align)
 
-        scrolled_window.on_event_after do |widget, event|
+        scrolled_window.on_event_after do |_widget, event|
           case event.event_type
           when Gdk::EventType::MOTION_NOTIFY
             false
@@ -39,7 +37,6 @@ module Layout
         end
 
         containerize(widget, scrolled_window, box_expand, box_fill, box_padding)
-
         add_class_to_css(scrolled_window, class_name)
         component_storage.store(id, scrolled_window)
         component_storage.store(@cid, scrolled_window)

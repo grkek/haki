@@ -78,9 +78,7 @@ module Layout
           box_padding = box_padding[..box_padding.size - 3]
         end
 
-        containerize(widget, entry, box_expand, box_fill, box_padding)
-
-        entry.on_event_after do |widget, event|
+        entry.on_event_after do |_widget, event|
           case event.event_type
           when Gdk::EventType::MOTION_NOTIFY
             false
@@ -90,6 +88,7 @@ module Layout
           end
         end
 
+        containerize(widget, entry, box_expand, box_fill, box_padding)
         add_class_to_css(entry, class_name)
         component_storage.store(id, entry)
         component_storage.store(@cid, entry)

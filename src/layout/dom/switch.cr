@@ -42,9 +42,7 @@ module Layout
           true
         end
 
-        containerize(widget, switch, box_expand, box_fill, box_padding)
-
-        switch.on_event_after do |widget, event|
+        switch.on_event_after do |_widget, event|
           case event.event_type
           when Gdk::EventType::MOTION_NOTIFY
             false
@@ -54,6 +52,7 @@ module Layout
           end
         end
 
+        containerize(widget, switch, box_expand, box_fill, box_padding)
         add_class_to_css(switch, class_name)
         component_storage.store(id, switch)
         component_storage.store(@cid, switch)

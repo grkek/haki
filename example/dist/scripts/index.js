@@ -14,8 +14,18 @@ const appConfiguration = {
   }
 };
 
-if (fs.fileExists("./config.json")) {
-  appConfiguration = JSON.parse(fs.readFile("./config.json"))
-} else {
-  fs.writeFile("./config.json", JSON.stringify(appConfiguration, null, 2))
-}
+const textMutation = {
+  updateNumberOne: function (_element, text) {
+    var label = getElementByComponentId("numberOneLabel");
+    label.setText(text);
+
+    print(text);
+  },
+
+  updateNumberTwo: function (_element, text) {
+    var label = getElementByComponentId("numberTwoLabel");
+    label.setText(text);
+
+    print(text);
+  },
+};

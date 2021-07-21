@@ -2,7 +2,7 @@ module Layout
   module Exceptions
     class ComponentNotFoundException < Exception
       def initialize(cid)
-        super("Component #{cid} was not found")
+        super("Component #{cid} was not found!")
       end
     end
   end

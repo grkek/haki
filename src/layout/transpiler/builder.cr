@@ -13,6 +13,7 @@ module Layout
         @component_storage = ComponentStorage.new
       end
 
+      # Create the main application, initialize the JavaScript context and build the components.
       def build_from_document(document)
         File.open(document) do |fd|
           structure = Layout::Parser.parse(fd.gets_to_end)
@@ -90,8 +91,8 @@ module Layout
 
                 idx = env.push_object
 
-                env.push_proc(1) do |ptr|
-                  sbx = Duktape::Sandbox.new(ptr)
+                env.push_proc(1) do |proc_ptr|
+                  sbx = Duktape::Sandbox.new(proc_ptr)
                   sbx.push_heap_stash
                   sbx.get_prop_string(-1, "setOpacityClosure")
                   proc = ::Box(Proc(Float64, Nil)).unbox(sbx.get_pointer(-1))
@@ -102,8 +103,8 @@ module Layout
 
                 env.put_prop_string(-2, "setOpacity")
 
-                env.push_proc(1) do |ptr|
-                  sbx = Duktape::Sandbox.new(ptr)
+                env.push_proc(1) do |proc_ptr|
+                  sbx = Duktape::Sandbox.new(proc_ptr)
                   sbx.push_heap_stash
                   sbx.get_prop_string(-1, "setVisibilityClosure")
                   proc = ::Box(Proc(Bool, Nil)).unbox(sbx.get_pointer(-1))
@@ -114,8 +115,8 @@ module Layout
 
                 env.put_prop_string(-2, "setVisible")
 
-                env.push_proc(1) do |ptr|
-                  sbx = Duktape::Sandbox.new(ptr)
+                env.push_proc(1) do |proc_ptr|
+                  sbx = Duktape::Sandbox.new(proc_ptr)
                   sbx.push_heap_stash
                   sbx.get_prop_string(-1, "setTextClosure")
                   proc = ::Box(Proc(String, Nil)).unbox(sbx.get_pointer(-1))
@@ -126,8 +127,8 @@ module Layout
 
                 env.put_prop_string(-2, "setText")
 
-                env.push_proc(1) do |ptr|
-                  sbx = Duktape::Sandbox.new(ptr)
+                env.push_proc(1) do |proc_ptr|
+                  sbx = Duktape::Sandbox.new(proc_ptr)
                   sbx.push_heap_stash
                   sbx.get_prop_string(-1, "getTextClosure")
                   proc = ::Box(Proc(String)).unbox(sbx.get_pointer(-1))
@@ -137,8 +138,8 @@ module Layout
 
                 env.put_prop_string(-2, "getText")
 
-                env.push_proc(4) do |ptr|
-                  sbx = Duktape::Sandbox.new(ptr)
+                env.push_proc(4) do |proc_ptr|
+                  sbx = Duktape::Sandbox.new(proc_ptr)
                   sbx.push_heap_stash
                   sbx.get_prop_string(-1, "setForegroundColorClosure")
                   proc = ::Box(Proc(Float64, Float64, Float64, Float64, Nil)).unbox(sbx.get_pointer(-1))
@@ -154,8 +155,8 @@ module Layout
 
                 env.put_prop_string(-2, "setForegroundColor")
 
-                env.push_proc(4) do |ptr|
-                  sbx = Duktape::Sandbox.new(ptr)
+                env.push_proc(4) do |proc_ptr|
+                  sbx = Duktape::Sandbox.new(proc_ptr)
                   sbx.push_heap_stash
                   sbx.get_prop_string(-1, "setBackgroundColorClosure")
                   proc = ::Box(Proc(Float64, Float64, Float64, Float64, Nil)).unbox(sbx.get_pointer(-1))
@@ -206,6 +207,7 @@ module Layout
         end
       end
 
+      # Calculate the elapsed text from elapsed time.
       private def elapsed_text(elapsed)
         millis = elapsed.total_milliseconds
         return "#{millis.round(2)}ms" if millis >= 1
@@ -213,6 +215,8 @@ module Layout
         "#{(millis * 1000).round(2)}µs"
       end
 
+      # Run the initalize_component method for each child and receive an actual Gtk::Widget from it
+      # then either containerize it if it is a container or just return the transpiled component.
       private def transpile_component(child, widget : Gtk::Widget)
         case child
         when Box, Frame, Tab, ListBox, ScrolledWindow
@@ -228,6 +232,16 @@ module Layout
         end
       end
 
+      # Process the StyleSheet's first and then proceed to processing the components.
+      private def transpile_components(parent, widget : Gtk::Widget)
+        recursive_stylesheet_processing(parent)
+
+        parent.children.each do |child|
+          transpile_component(child, widget)
+        end
+      end
+
+      # Recursively drill down the components and find StyleSheet components and process them before proceeding.
       private def recursive_stylesheet_processing(parent)
         parent.children.each do |child|
           case child
@@ -239,15 +253,7 @@ module Layout
         end
       end
 
-      # ameba:disable Metrics/CyclomaticComplexity
-      private def transpile_components(parent, widget : Gtk::Widget)
-        recursive_stylesheet_processing(parent)
-
-        parent.children.each do |child|
-          transpile_component(child, widget)
-        end
-      end
-
+      # Use the Gtk::CssProvider to update the style context with the source of the CSS file.
       private def process_stylesheet(child)
         css_provider = Gtk::CssProvider.new
         css_provider.load_from_path(child.attributes["src"])
@@ -256,6 +262,7 @@ module Layout
         Gtk::StyleContext.add_provider_for_screen screen, css_provider, Gtk::STYLE_PROVIDER_PRIORITY_APPLICATION
       end
 
+      # Build components from the main document model, start with either a StyleSheet component or the Window component.
       private def build_components(document, widget)
         document.children.each do |child|
           case child

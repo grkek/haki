@@ -21,7 +21,6 @@ module Layout
 
       def initialize
         @runtime = Duktape::Runtime.new
-        # ameba:disable Lint/UselessAssign
         context = @runtime.context
 
         misc()
@@ -31,7 +30,7 @@ module Layout
         fs()
         system()
 
-        @runtime.context.eval! <<-JS
+        context.eval! <<-JS
           String.prototype.format = function() {
               var formatted = this;
               for( var arg in arguments ) {

@@ -119,9 +119,6 @@ module Layout
             nil
           when "StyleSheet"
             Layout::Dom::StyleSheet.new(attrs)
-          when "Script"
-            Layout::Dom::Script.new(attrs, children)
-            nil
           when "TextInput"
             Layout::Dom::TextInput.new(attrs)
           when "Spinner"
@@ -168,7 +165,7 @@ module Layout
                 end
               end
             else
-              raise Exceptions::InvalidElementException.new(tag_name, @position)
+              raise Exceptions::InvalidComponentException.new(tag_name, @position)
             end
           end
         else
@@ -181,7 +178,6 @@ module Layout
           case tag_name
           when "Script"
             Layout::Dom::Script.new(attrs, children)
-
             nil
           when "Application"
             Layout::Dom::Application.new(attrs, children)
@@ -214,7 +210,7 @@ module Layout
               child.children.concat(children)
               child
             else
-              raise Exceptions::InvalidElementException.new(tag_name, @position)
+              raise Exceptions::InvalidComponentException.new(tag_name, @position)
             end
           end
         end

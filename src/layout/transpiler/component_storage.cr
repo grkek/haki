@@ -17,7 +17,7 @@ module Layout
 
       def retrieve(cid : String) : Pointer(LibGtk::Widget)
         if widget = @components[cid]?
-          return widget.not_nil!
+          widget.not_nil!
         else
           raise Exceptions::ComponentNotFoundException.new(cid)
         end

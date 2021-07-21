@@ -25,11 +25,9 @@ module Layout
           box_padding = box_padding[..box_padding.size - 3]
         end
 
-        spacing = @attributes["spacing"]? || "2"
-
         frame = Gtk::Frame.new(name: id, label: value, halign: horizontal_align, valign: vertical_align)
 
-        frame.on_event_after do |widget, event|
+        frame.on_event_after do |_widget, event|
           case event.event_type
           when Gdk::EventType::MOTION_NOTIFY
             false
@@ -40,7 +38,6 @@ module Layout
         end
 
         containerize(widget, frame, box_expand, box_fill, box_padding)
-
         add_class_to_css(frame, class_name)
         component_storage.store(id, frame)
         component_storage.store(@cid, frame)

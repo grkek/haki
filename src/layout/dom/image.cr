@@ -22,7 +22,7 @@ module Layout
         width = @attributes["width"]? || "256"
         height = @attributes["height"]? || "256"
 
-        preserve_aspect_ration = @attributes["preserveAspectRation"]? || "true"
+        # preserve_aspect_ration = @attributes["preserveAspectRation"]? || "true"
 
         if width.includes?(".0")
           width = width[..width.size - 3]
@@ -60,9 +60,7 @@ module Layout
           box_padding = box_padding[..box_padding.size - 3]
         end
 
-        containerize(widget, image, box_expand, box_fill, box_padding)
-
-        image.on_event_after do |widget, event|
+        image.on_event_after do |_widget, event|
           case event.event_type
           when Gdk::EventType::MOTION_NOTIFY
             false
@@ -72,8 +70,8 @@ module Layout
           end
         end
 
+        containerize(widget, image, box_expand, box_fill, box_padding)
         add_class_to_css(image, class_name)
-
         component_storage.store(id, image)
         component_storage.store(@cid, image)
         did_mount(@cid)

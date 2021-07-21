@@ -38,7 +38,7 @@ module Layout
 
         box = Gtk::Box.new(name: id, orientation: orientation, spacing: spacing.to_i, halign: horizontal_align, valign: vertical_align)
 
-        box.on_event_after do |widget, event|
+        box.on_event_after do |_widget, event|
           case event.event_type
           when Gdk::EventType::MOTION_NOTIFY
             false
@@ -49,7 +49,6 @@ module Layout
         end
 
         containerize(widget, box, box_expand, box_fill, box_padding)
-
         add_class_to_css(box, class_name)
         component_storage.store(id, box)
         component_storage.store(@cid, box)

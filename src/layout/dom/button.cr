@@ -42,7 +42,7 @@ module Layout
 
         button = Gtk::Button.new(name: id, label: text, relief: relief_style, halign: horizontal_align, valign: vertical_align)
 
-        button.on_event_after do |widget, event|
+        button.on_event_after do |_widget, event|
           case event.event_type
           when Gdk::EventType::MOTION_NOTIFY
             false
@@ -56,9 +56,8 @@ module Layout
           Layout::Js::Engine::INSTANCE.evaluate("#{on_click}(getElementByComponentId(\"#{@cid}\"))")
         end
 
-        add_class_to_css(button, class_name)
-
         containerize(widget, button, box_expand, box_fill, box_padding)
+        add_class_to_css(button, class_name)
         component_storage.store(id, button)
         component_storage.store(@cid, button)
         did_mount(@cid)

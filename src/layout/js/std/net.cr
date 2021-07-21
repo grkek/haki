@@ -13,7 +13,7 @@ module Layout
 
             response = HTTP::Client.exec(method, path)
             sbx.push_string response.body
-            
+
             sbx.call_success
           end
         end
