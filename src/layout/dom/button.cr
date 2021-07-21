@@ -10,26 +10,59 @@ module Layout
 
       def initialize(@attributes, @children)
         @kind = "Button"
+        substitution()
+      end
 
-        @attributes.map do |key, value|
-          matches = value.scan(/\${(.*?)}/)
+      def initialize_component(widget : Gtk::Widget, component_storage : Transpiler::ComponentStorage) : Gtk::Widget
+        id = @attributes["id"]? || ""
+        class_name = @attributes["className"]? || nil
+        relief = @attributes["relief"]? || nil
+        text = children.first.as(Text).data.to_s
+        on_click = @attributes["onClick"]? || ""
 
-          case matches.size
-          when 0
-            @attributes[key] = value
+        horizontal_align = to_align(@attributes["horizontalAlign"]? || "")
+        vertical_align = to_align(@attributes["verticalAlign"]? || "")
+
+        box_expand = @attributes["boxExpand"]? || "false"
+        box_fill = @attributes["boxFill"]? || "false"
+        box_padding = @attributes["boxPadding"]? || "0"
+
+        if box_padding.includes?(".0")
+          box_padding = box_padding[..box_padding.size - 3]
+        end
+
+        case relief
+        when "none"
+          relief_style = Gtk::ReliefStyle::NONE
+        when "normal"
+          relief_style = Gtk::ReliefStyle::NORMAL
+        else
+          relief_style = Gtk::ReliefStyle::NORMAL
+        end
+
+        button = Gtk::Button.new(name: id, label: text, relief: relief_style, halign: horizontal_align, valign: vertical_align)
+
+        button.on_event_after do |_widget, event|
+          case event.event_type
+          when Gdk::EventType::MOTION_NOTIFY
+            false
           else
-            matches.each do |match|
-              hash = match.to_h
-
-              begin
-                @attributes[key] = value.gsub(hash[0].not_nil!, "#{Layout::Js::Engine::INSTANCE.evaluate(hash[1].not_nil!)}")
-              rescue ex : Exception
-                @attributes[key] = value
-                puts "An exception occured while evaluating a variable format routine: #{ex}"
-              end
-            end
+            did_update(@cid, event.event_type.to_s)
+            true
           end
         end
+
+        button.on_clicked do
+          Layout::Js::Engine::INSTANCE.evaluate("#{on_click}(getElementByComponentId(\"#{@cid}\"))")
+        end
+
+        containerize(widget, button, box_expand, box_fill, box_padding)
+        add_class_to_css(button, class_name)
+        component_storage.store(id, button)
+        component_storage.store(@cid, button)
+        did_mount(@cid)
+
+        button
       end
 
       def to_html : String

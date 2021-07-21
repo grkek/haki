@@ -3,13 +3,13 @@ require "./element"
 
 module Layout
   module Dom
-    class Switch < Element
+    class VerticalSeparator < Element
       @attributes : Hash(String, String)
 
       getter :attributes
 
       def initialize(@attributes)
-        @kind = "Switch"
+        @kind = "VerticalSeparator"
         @children = [] of Node
         substitution()
       end
@@ -20,29 +20,18 @@ module Layout
 
         horizontal_align = to_align(@attributes["horizontalAlign"]? || "")
         vertical_align = to_align(@attributes["verticalAlign"]? || "")
-        value = to_bool(@attributes["value"]? || "false")
 
-        switch = Gtk::Switch.new(name: id, halign: horizontal_align, valign: vertical_align, state: value)
+        vertical_separator = Gtk::Separator.new(name: id, orientation: Gtk::Orientation::VERTICAL, halign: horizontal_align, valign: vertical_align)
 
         box_expand = @attributes["boxExpand"]? || "false"
         box_fill = @attributes["boxFill"]? || "false"
         box_padding = @attributes["boxPadding"]? || "0"
 
-        value_change = @attributes["onValueChange"]? || nil
-
         if box_padding.includes?(".0")
           box_padding = box_padding[..box_padding.size - 3]
         end
 
-        switch.on_state_set do
-          if value_change
-            Layout::Js::Engine::INSTANCE.evaluate("#{value_change}(getElementByComponentId(\"#{@cid}\"), #{switch.active})")
-          end
-
-          true
-        end
-
-        switch.on_event_after do |_widget, event|
+        vertical_separator.on_event_after do |_widget, event|
           case event.event_type
           when Gdk::EventType::MOTION_NOTIFY
             false
@@ -52,13 +41,14 @@ module Layout
           end
         end
 
-        containerize(widget, switch, box_expand, box_fill, box_padding)
-        add_class_to_css(switch, class_name)
-        component_storage.store(id, switch)
-        component_storage.store(@cid, switch)
+        containerize(widget, vertical_separator, box_expand, box_fill, box_padding)
+
+        add_class_to_css(vertical_separator, class_name)
+        component_storage.store(id, vertical_separator)
+        component_storage.store(@cid, vertical_separator)
         did_mount(@cid)
 
-        switch
+        vertical_separator
       end
 
       def to_html : String

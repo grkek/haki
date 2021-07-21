@@ -3,13 +3,14 @@ require "./element"
 
 module Layout
   module Dom
-    class Application < Element
+    class ProgressBar < Element
       @attributes : Hash(String, String)
 
       getter :attributes
 
-      def initialize(@attributes, @children)
-        @kind = "Application"
+      def initialize(@attributes)
+        @kind = "ProgressBar"
+        @children = [] of Node
         substitution()
       end
 

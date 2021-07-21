@@ -10,26 +10,38 @@ module Layout
 
       def initialize(@attributes, @children)
         @kind = "Window"
+        substitution()
+      end
 
-        @attributes.map do |key, value|
-          matches = value.scan(/\${(.*?)}/)
+      def initialize_component(widget : Gtk::Application, component_storage : Transpiler::ComponentStorage)
+        id = @attributes["id"]? || ""
+        class_name = @attributes["className"]? || nil
+        title = @attributes["title"]? || "Untitled"
+        width = @attributes["width"]? || "800"
+        height = @attributes["height"]? || "600"
 
-          case matches.size
-          when 0
-            @attributes[key] = value
-          else
-            matches.each do |match|
-              hash = match.to_h
-
-              begin
-                @attributes[key] = value.gsub(hash[0].not_nil!, "#{Layout::Js::Engine::INSTANCE.evaluate(hash[1].not_nil!)}")
-              rescue ex : Exception
-                @attributes[key] = value
-                puts "An exception occured while evaluating a variable format routine: #{ex}"
-              end
-            end
-          end
+        if width.includes?(".0")
+          width = width[..width.size - 3]
         end
+
+        if height.includes?(".0")
+          height = height[..height.size - 3]
+        end
+
+        window = Gtk::ApplicationWindow.new(
+          name: id,
+          application: widget,
+          title: title,
+          default_width: width.to_i,
+          default_height: height.to_i
+        )
+
+        window.try(&.connect "destroy", &->exit)
+        window.position = Gtk::WindowPosition::CENTER_ALWAYS
+
+        add_class_to_css(window, class_name)
+        component_storage.store(@cid, window)
+        window
       end
 
       def to_html : String

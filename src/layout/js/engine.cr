@@ -21,7 +21,6 @@ module Layout
 
       def initialize
         @runtime = Duktape::Runtime.new
-        # ameba:disable Lint/UselessAssign
         context = @runtime.context
 
         misc()
@@ -31,7 +30,7 @@ module Layout
         fs()
         system()
 
-        context.eval_string! <<-JS
+        context.eval! <<-JS
           String.prototype.format = function() {
               var formatted = this;
               for( var arg in arguments ) {
@@ -42,18 +41,17 @@ module Layout
         JS
       end
 
-      def lazy_evaluate(js : String)
-        is_lazy = true
-        loop do
-          if !is_lazy
-            @runtime.context.eval(js)
-            break
-          end
-        end
-      end
-
       def evaluate(js : String)
-        @runtime.context.eval!(js)
+        begin
+          return_value = @runtime.eval(js)
+          return_value
+        rescue exception
+          puts "Execution failed during:"
+          puts "\033[0;33m#{Beautify.js(js)}\033[0m"
+
+          puts "Exception:"
+          puts exception
+        end
       end
     end
   end

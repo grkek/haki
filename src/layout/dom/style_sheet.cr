@@ -11,26 +11,7 @@ module Layout
       def initialize(@attributes)
         @kind = "StyleSheet"
         @children = [] of Node
-
-        @attributes.map do |key, value|
-          matches = value.scan(/\${(.*?)}/)
-
-          case matches.size
-          when 0
-            @attributes[key] = value
-          else
-            matches.each do |match|
-              hash = match.to_h
-
-              begin
-                @attributes[key] = value.gsub(hash[0].not_nil!, "#{Layout::Js::Engine::INSTANCE.evaluate(hash[1].not_nil!)}")
-              rescue ex : Exception
-                @attributes[key] = value
-                puts "An exception occured while evaluating a variable format routine: #{ex}"
-              end
-            end
-          end
-        end
+        substitution()
       end
 
       def to_html : String
