@@ -11,7 +11,7 @@ module Layout
         substitution()
       end
 
-      def initialize_component(widget : Gtk::Widget, component_storage : Transpiler::ComponentStorage)
+      def initialize_component(widget : Gtk::Widget)
         id = @attributes["id"]? || ""
         class_name = @attributes["className"]? || nil
         horizontal_align = to_align(@attributes["horizontalAlign"]? || "")
@@ -38,21 +38,20 @@ module Layout
 
         box = Gtk::Box.new(name: id, orientation: orientation, spacing: spacing.to_i, halign: horizontal_align, valign: vertical_align)
 
+        Js::Engine.instance.eval! ["const", id, "=", {type: "Box", className: class_name, availableCallbacks: ["onEvent"]}.to_json].join(" ")
+
         box.on_event_after do |_widget, event|
           case event.event_type
           when Gdk::EventType::MOTION_NOTIFY
             false
           else
-            did_update(@cid, event.event_type.to_s)
+            Js::Engine.instance.eval! [id, ".", "onEvent", "(", "\"", event.event_type.to_s, "\"", ")"].join()
             true
           end
         end
 
         containerize(widget, box, box_expand, box_fill, box_padding)
         add_class_to_css(box, class_name)
-        component_storage.store(id, box)
-        component_storage.store(@cid, box)
-        did_mount(@cid)
 
         box
       end

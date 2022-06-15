@@ -1,80 +1,13 @@
-<Application gid="com.monkeyshoulder.desktop">
+<Application applicationId="com.example.layout">
+  <Import src="./example/dist/components/authorization.html" as="Authorization" />
   <StyleSheet src="./example/dist/styles/index.css" />
   <Script src="./example/dist/scripts/index.js"></Script>
 
-  <Window className="main-window" title="${appConfiguration.window.title}" width="${appConfiguration.window.width}" height="${appConfiguration.window.height}">
-    <Box className="main-box" orientation="vertical">
-      <Box orientation="horizontal">
-        <Label className="main-label" boxExpand="true" boxFill="true" horizontalAlign="start">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        </Label>
+  <Window className="mainWindow" title="Untitled Window" width="800" height="600">
+    <Box id="mainBox" className="mainBox">
+      <Label className="mainLabel" boxExpand="false" boxFill="true" boxPadding="10">Hello, World!</Label>
 
-        <Label className="main-label" boxExpand="true" boxFill="true" horizontalAlign="end">
-          Morbi varius odio quis metus ullamcorper porttitor.
-        </Label>
-      </Box>
-
-      <Box orientation="horizontal">
-        <Label className="main-label" boxExpand="true" boxFill="true" horizontalAlign="fill">
-          Cras ac erat vitae libero pellentesque scelerisque.
-        </Label>
-
-        <Label className="main-label" boxExpand="true" boxFill="true" horizontalAlign="fill">
-          Vestibulum dictum nisi quam, eget pharetra lorem lacinia in.
-        </Label>
-      </Box>
-
-      <HorizontalSeparator className="horizontal-separator" />
-
-      <Box orientation="horizontal">
-        <TextInput className="main-text-input" placeholder="E-Mail" boxExpand="true" boxFill="true" horizontalAlign="fill" />
-        <TextInput className="main-text-input" placeholder="Password" isPassword="true" boxExpand="true" boxFill="true" horizontalAlign="fill" />
-      </Box>
-
-      <HorizontalSeparator className="horizontal-separator-number" />
-
-      <Box orientation="horizontal">
-        <Button className="main-button" boxExpand="true" boxFill="true" horizontalAlign="fill">Button #1</Button>
-        <Button className="main-button" boxExpand="true" boxFill="true" horizontalAlign="fill">Button #2</Button>
-      </Box>
-
-      <HorizontalSeparator className="horizontal-separator" />
-
-      <Box orientation="horizontal">
-        <Label className="main-label"> Am I useless?</Label>
-        <Switch className="main-switch" boxExpand="true" boxFill="true" horizontalAlign="end" />
-
-        <Label className="main-label"> Am I usefull?</Label>
-        <Switch className="main-switch" boxExpand="true" boxFill="true" horizontalAlign="end" />
-      </Box>
-
-      <HorizontalSeparator className="horizontal-separator-number" />
-
-      <Box className="number-box" orientation="horizontal">
-        <TextInput onChangeText={textMutation.updateNumberOne} className="number-text" boxExpand="true" boxFill="true" placeholder="Number 1" horizontalAlign="fill" />
-        <TextInput onChangeText={textMutation.updateNumberTwo} className="number-text" placeholder="Number 2" boxExpand="true" boxFill="true" horizontalAlign="fill" />
-      </Box>
-
-      <HorizontalSeparator className="horizontal-separator-number" />
-
-      <Box boxExpand="true" boxFill="true">
-        <Frame className="main-frame" value="Collection of Lorem ipsum" boxExpand="true" boxFill="true">
-          <ScrolledWindow className="main-scrolled-window">
-            <ListBox className="main-list-box">
-              <Label>1. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et mauris in nunc commodo ullamcorper sit amet non lectus. Quisque non fermentum dui. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae;</Label>
-              <Label>2. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et mauris in nunc commodo ullamcorper sit amet non lectus. Quisque non fermentum dui. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae;</Label>
-              <Label>3. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et mauris in nunc commodo ullamcorper sit amet non lectus. Quisque non fermentum dui. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae;</Label>
-              <Label>4. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et mauris in nunc commodo ullamcorper sit amet non lectus. Quisque non fermentum dui. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae;</Label>
-              <Label>5. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et mauris in nunc commodo ullamcorper sit amet non lectus. Quisque non fermentum dui. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae;</Label>
-            </ListBox>
-          </ScrolledWindow>
-        </Frame>
-      </Box>
-
-      <Box orientation="horizontal">
-        <Label id="numberOneLabel" className="main-label" boxExpand="true" boxFill="false" horizontalAlign="start">Number 1 TextEntry text!</Label>
-        <Label id="numberTwoLabel" className="main-label" boxExpand="true" boxFill="false" horizontalAlign="end">Number 2 TextEntry text!</Label>
-      </Box>
+      <Authorization />
     </Box>
   </Window>
 </Application>

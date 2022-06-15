@@ -4,39 +4,32 @@
 
 .mainBox {
   transition: all 1s ease;
-  background-color: white;
-}
-
-.disablerBox{
-  margin-bottom: 20px;
+  background-color: black;
 }
 
 .darkModeLabel {
   transition: all 1s ease;
-  color: black;
+  color: white;
 }
 
 .darkModeSwitch {
   transition: all 1s ease;
   background-color: transparent;
-  color: black;
+  color: white;
 }
 
 .darkModeSwitch slider {
   transition: all 1s ease;
-	background-color: black;
+	background-color: white;
 	border: none;
 }
 
+
 .mainLabel {
   transition: all 1s ease;
-  color: black;
+  color: white;
   margin-top: 50px;
   font-size: 50px;
-}
-
-.mainLabel:focus {
-  color: red;
 }
 
 .authorizationButton {
@@ -46,12 +39,12 @@
   background-color: transparent;
   margin-top: 25px;
   margin-bottom: 50px;
-  color: black;
+  color: white;
 }
 
 .authorizationButton:hover {
   transition: all 1s ease;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .authorizationButton:active {

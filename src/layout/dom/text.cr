@@ -20,7 +20,7 @@ module Layout
             hash = match.to_h
 
             begin
-              @data = data.gsub(hash[0].not_nil!, Layout::Js::Engine::INSTANCE.evaluate("__std__value_of__(#{hash[1].not_nil!})").to_s)
+              @data = data.gsub(hash[0].not_nil!, Js::Engine.instance.eval!("__std__value_of__(#{hash[1].not_nil!})").to_s)
             rescue ex : Exception
               @data = data
               puts "An exception occured while evaluating a variable format routine: #{ex}"

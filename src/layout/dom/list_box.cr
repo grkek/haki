@@ -11,7 +11,7 @@ module Layout
         substitution()
       end
 
-      def initialize_component(widget : Gtk::Widget, component_storage : Transpiler::ComponentStorage)
+      def initialize_component(widget : Gtk::Widget)
         id = @attributes["id"]? || ""
         class_name = @attributes["className"]? || nil
         horizontal_align = to_align(@attributes["horizontalAlign"]? || "")
@@ -32,16 +32,13 @@ module Layout
           when Gdk::EventType::MOTION_NOTIFY
             false
           else
-            did_update(@cid, event.event_type.to_s)
+            # TODO: Add an event handler for the components to forward information to JavaScript.
             true
           end
         end
 
         containerize(widget, list_box, box_expand, box_fill, box_padding)
         add_class_to_css(list_box, class_name)
-        component_storage.store(id, list_box)
-        component_storage.store(@cid, list_box)
-        did_mount(@cid)
 
         list_box
       end

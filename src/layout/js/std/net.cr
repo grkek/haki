@@ -16,6 +16,13 @@ module Layout
 
             sbx.call_success
           end
+
+          context.eval! <<-JS
+            const http = {
+              get: function(path, params) { return __std__http_request__("GET", path, params); },
+              post: function(path, params) { return __std__http_request__("POST", path, params); }
+            };
+          JS
         end
       end
     end

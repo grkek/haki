@@ -13,7 +13,7 @@ module Layout
         substitution()
       end
 
-      def initialize_component(widget : Gtk::Application, component_storage : Transpiler::ComponentStorage)
+      def initialize_component(widget : Gtk::Application)
         id = @attributes["id"]? || ""
         class_name = @attributes["className"]? || nil
         title = @attributes["title"]? || "Untitled"
@@ -40,7 +40,7 @@ module Layout
         window.position = Gtk::WindowPosition::CENTER_ALWAYS
 
         add_class_to_css(window, class_name)
-        component_storage.store(@cid, window)
+
         window
       end
 

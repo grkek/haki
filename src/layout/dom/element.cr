@@ -7,7 +7,6 @@ module Layout
       @attributes : Hash(String, String)
 
       getter :attributes
-      getter cid : String = UUID.random.hexstring
 
       def initialize(@kind, @attributes, @children = [] of Node)
         substitution()
@@ -25,31 +24,13 @@ module Layout
               hash = match.to_h
 
               begin
-                @attributes[key] = value.gsub(hash[0].not_nil!, Layout::Js::Engine::INSTANCE.evaluate("__std__value_of__(#{hash[1].not_nil!})").to_s)
+                @attributes[key] = value.gsub(hash[0].not_nil!, Js::Engine.instance.eval!("__std__value_of__(#{hash[1].not_nil!})").to_s)
               rescue ex : Exception
                 @attributes[key] = value
                 puts "An exception occured while evaluating a variable format routine: #{ex}"
               end
             end
           end
-        end
-      end
-
-      def did_mount(cid)
-        if function = @attributes["onComponentDidMount"]?
-          Layout::Js::Engine::INSTANCE.evaluate("#{function}(#{@attributes.to_json}, getElementByComponentId(\"#{cid}\"))")
-        end
-      end
-
-      def did_update(cid, event_type)
-        if function = @attributes["onComponentDidUpdate"]?
-          Layout::Js::Engine::INSTANCE.evaluate("#{function}(#{@attributes.to_json}, getElementByComponentId(\"#{cid}\"), \"#{event_type}\")")
-        end
-      end
-
-      def will_unmount(cid)
-        if function = @attributes["onComponentWillUnmount"]?
-          Layout::Js::Engine::INSTANCE.evaluate("#{function}(#{@attributes.to_json}, getElementByComponentId(\"#{cid}\")")
         end
       end
 

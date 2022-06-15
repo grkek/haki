@@ -141,17 +141,7 @@ module Layout
                   element = Parser.parse(fd.gets_to_end).as(Layout::Dom::Export)
 
                   if element.attributes["as"].not_nil! == child.attributes["as"].not_nil!
-                    case element.children.first
-                    when Layout::Dom::StyleSheet
-                      element.children[1].children.push(element.children.first)
-                      child = element.children[1].as(Layout::Dom::Element)
-                      child.attributes.merge!(attrs)
-                      child
-                    else
-                      child = element.children.first.as(Layout::Dom::Element)
-                      child.attributes.merge!(attrs)
-                      child
-                    end
+                    element
                   else
                     raise Exceptions::ImportNotFoundException.new(child.attributes["src"].not_nil!, child.attributes["as"].not_nil!, element.attributes["as"].not_nil!)
                   end
@@ -178,7 +168,6 @@ module Layout
           case tag_name
           when "Script"
             Layout::Dom::Script.new(attrs, children)
-            nil
           when "Application"
             Layout::Dom::Application.new(attrs, children)
           when "Window"
@@ -244,22 +233,8 @@ module Layout
           value = parse_function
           assert!(next_char == '}', @position)
 
-          if [
-               "onClick",
-               "onChangeText",
-               "onCut",
-               "onPaste",
-               "onCopy",
-               "onComponentDidMount",
-               "onComponentDidUpdate",
-               "onComponentWillUnmount",
-               "onValueChange",
-               "onActivate",
-             ].includes?(key)
-            value
-          else
-            "#{Layout::Js::Engine::INSTANCE.evaluate(value)}"
-          end
+          # TODO: Add a mechanism to handle the substitution directly in HTML
+          value
         elsif peek == '"'
           possible_quote = peek
           next_char

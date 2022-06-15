@@ -14,16 +14,11 @@ module Layout
         substitution()
       end
 
-      def initialize_component(widget : Gtk::Widget, component_storage : Transpiler::ComponentStorage)
+      def initialize_component(widget : Gtk::Widget)
         id = @attributes["id"]? || ""
         class_name = @attributes["className"]? || nil
         label = @attributes["value"]? || nil
         placeholder = @attributes["placeholder"]? || nil
-        text_changed = @attributes["onChangeText"]? || nil
-        cut_clipboard = @attributes["onCut"]? || nil
-        copy_clipboard = @attributes["onCopy"]? || nil
-        paste_clipboard = @attributes["onPaste"]? || nil
-        on_activate = @attributes["onActivate"]? || nil
 
         horizontal_align = to_align(@attributes["horizontalAlign"]? || "")
         vertical_align = to_align(@attributes["verticalAlign"]? || "")
@@ -34,40 +29,30 @@ module Layout
 
         entry = Gtk::Entry.new(name: id, text: label, placeholder_text: placeholder, invisible_char: invisible_char, visibility: visibility, halign: horizontal_align, valign: vertical_align)
 
+        Js::Engine.instance.eval! ["const", id, "=", {type: "Entry", className: class_name, avaliableCallbacks: ["onInsertedText", "onDeletedText", "onCutClipboard", "onCopyClipboard", "onPasteClipboard", "onActivate"]}.to_json].join(" ")
+
         entry.buffer.on_inserted_text do |buffer|
-          if text_changed
-            Layout::Js::Engine::INSTANCE.evaluate("#{text_changed}(getElementByComponentId(\"#{@cid}\"), \"#{buffer.text}\")")
-          end
+          Js::Engine.instance.eval! [id, ".", "onInsertedText", "(", "\"", buffer.text, "\"", ")"].join
         end
 
         entry.buffer.on_deleted_text do |buffer|
-          if text_changed
-            Layout::Js::Engine::INSTANCE.evaluate("#{text_changed}(getElementByComponentId(\"#{@cid}\"), \"#{buffer.text}\")")
-          end
+          Js::Engine.instance.eval! [id, ".", "onDeletedText", "(", "\"", buffer.text, "\"", ")"].join
         end
 
         entry.on_cut_clipboard do
-          if cut_clipboard
-            Layout::Js::Engine::INSTANCE.evaluate("#{cut_clipboard}(getElementByComponentId(\"#{@cid}\"), \"#{entry.buffer.text}\")")
-          end
+          Js::Engine.instance.eval! [id, ".", "onCutClipboard", "(", "\"", entry.buffer.text, "\"", ")"].join
         end
 
         entry.on_copy_clipboard do
-          if copy_clipboard
-            Layout::Js::Engine::INSTANCE.evaluate("#{copy_clipboard}(getElementByComponentId(\"#{@cid}\"), \"#{entry.buffer.text}\")")
-          end
+          Js::Engine.instance.eval! [id, ".", "onCopyClipboard", "(", "\"", entry.buffer.text, "\"", ")"].join
         end
 
         entry.on_paste_clipboard do
-          if paste_clipboard
-            Layout::Js::Engine::INSTANCE.evaluate("#{paste_clipboard}(getElementByComponentId(\"#{@cid}\"), \"#{entry.buffer.text}\")")
-          end
+          Js::Engine.instance.eval! [id, ".", "onPasteClipboard", "(", "\"", entry.buffer.text, "\"", ")"].join
         end
 
         entry.on_activate do
-          if on_activate
-            Layout::Js::Engine::INSTANCE.evaluate("#{on_activate}(getElementByComponentId(\"#{@cid}\"), \"#{entry.buffer.text}\")")
-          end
+          Js::Engine.instance.eval! [id, ".", "onActivate", "(", "\"", entry.buffer.text, "\"", ")"].join
         end
 
         box_expand = @attributes["boxExpand"]? || "false"
@@ -83,16 +68,13 @@ module Layout
           when Gdk::EventType::MOTION_NOTIFY
             false
           else
-            did_update(@cid, event.event_type.to_s)
+            # TODO: Add an event handler for the components to forward information to JavaScript.
             true
           end
         end
 
         containerize(widget, entry, box_expand, box_fill, box_padding)
         add_class_to_css(entry, class_name)
-        component_storage.store(id, entry)
-        component_storage.store(@cid, entry)
-        did_mount(@cid)
 
         entry
       end

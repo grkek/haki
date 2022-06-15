@@ -13,12 +13,11 @@ module Layout
         substitution()
       end
 
-      def initialize_component(widget : Gtk::Widget, component_storage : Transpiler::ComponentStorage) : Gtk::Widget
+      def initialize_component(widget : Gtk::Widget) : Gtk::Widget
         id = @attributes["id"]? || ""
         class_name = @attributes["className"]? || nil
         relief = @attributes["relief"]? || nil
         text = children.first.as(Text).data.to_s
-        on_click = @attributes["onClick"]? || ""
 
         horizontal_align = to_align(@attributes["horizontalAlign"]? || "")
         vertical_align = to_align(@attributes["verticalAlign"]? || "")
@@ -42,25 +41,24 @@ module Layout
 
         button = Gtk::Button.new(name: id, label: text, relief: relief_style, halign: horizontal_align, valign: vertical_align)
 
+        Js::Engine.instance.eval! ["const", id, "=", {type: "Button", className: class_name, availableCallbacks: ["onEvent", "onClick"]}.to_json].join(" ")
+
         button.on_event_after do |_widget, event|
           case event.event_type
           when Gdk::EventType::MOTION_NOTIFY
             false
           else
-            did_update(@cid, event.event_type.to_s)
+            Js::Engine.instance.eval! [id, ".", "onEvent", "(", "\"", event.event_type.to_s, "\"", ")"].join()
             true
           end
         end
 
         button.on_clicked do
-          Layout::Js::Engine::INSTANCE.evaluate("#{on_click}(getElementByComponentId(\"#{@cid}\"))")
+          Js::Engine.instance.eval! [id, ".", "onClick", "()"].join()
         end
 
         containerize(widget, button, box_expand, box_fill, box_padding)
         add_class_to_css(button, class_name)
-        component_storage.store(id, button)
-        component_storage.store(@cid, button)
-        did_mount(@cid)
 
         button
       end
