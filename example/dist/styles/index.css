@@ -1,60 +1,183 @@
-.mainWindow {
+.main-window {
   background-color: black;
 }
 
-.mainBox {
+.main-box {
   transition: all 1s ease;
-  background-color: white;
+  background-color: rgb(28, 30, 39);
 }
 
-.disablerBox{
+.main-label {
+  margin-top: 20px;
   margin-bottom: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
+  font-weight: 200;
+  font-family: 'Fira Code';
+  color: rgb(233, 131, 118);
 }
 
-.darkModeLabel {
-  transition: all 1s ease;
-  color: black;
-}
-
-.darkModeSwitch {
-  transition: all 1s ease;
+.main-text-input{
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
   background-color: transparent;
-  color: black;
+  border-color: rgb(231, 68, 111);
+  color: rgb(241, 149, 137);
+  font-weight: 100;
+  font-size: 12px;
+  border-radius: 100px;
+  box-shadow: none;
+  text-shadow: none;
 }
 
-.darkModeSwitch slider {
-  transition: all 1s ease;
-	background-color: black;
-	border: none;
+.number-text{
+  margin-left: 20px;
+  margin-right: 20px;
+  background-color: transparent;
+  border-color: rgb(231, 68, 111);
+  color: rgb(241, 149, 137);
+  font-weight: 100;
+  font-size: 12px;
+  border-radius: 100px;
+  box-shadow: none;
+  text-shadow: none;
 }
 
-.mainLabel {
-  transition: all 1s ease;
-  color: black;
-  margin-top: 50px;
-  font-size: 50px;
-}
-
-.mainLabel:focus {
+.number-text:hover{
   color: red;
 }
 
-.authorizationButton {
-  transition: all 1s ease;
-  font-size: 25px;
-  border-color: transparent;
+.main-button{
+  transition: all 0.5s ease;
   background-color: transparent;
-  margin-top: 25px;
-  margin-bottom: 50px;
-  color: black;
+  background-image: none;
+  box-shadow: none;
+  text-shadow: none;
+  color: rgb(255,255,255);
+  font-weight: 100;
+  border-color: rgb(231, 68, 111);
+  border-radius: 100px;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 20px;
 }
 
-.authorizationButton:hover {
-  transition: all 1s ease;
-  color: rgba(0, 0, 0, 0.5);
+.main-button:hover{
+  transition: all 0.5s ease;
+  border-color: rgb(200, 60, 100);
+  color:rgb(200,200,200);
 }
 
-.authorizationButton:active {
+.main-switch{
   transition: all 1s ease;
-  color: transparent;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+  text-shadow: none;
+  border-color: rgb(231, 68, 111);
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-right: 20px;
+}
+
+.main-switch slider {
+  transition: all 0.5s ease;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+  text-shadow: none;
+  border-color: rgb(241, 149, 137);
+}
+
+.main-switch slider:hover {
+  transition: all 0.5s ease;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+  text-shadow: none;
+  border-color: rgb(248, 202, 196);
+}
+
+.main-list-box {
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  background-color: transparent;
+}
+
+.main-list-box row{
+  transition: all 0.5s ease;
+  font-weight: 200;
+  font-family: 'Fira Code';
+  color: rgb(233, 131, 118);
+  background-color: transparent;
+  margin-top: 20px;
+}
+
+.main-list-box row:hover{
+  transition: all 0.5s ease;
+  color: rgb(248, 202, 196);
+}
+
+.main-list-box row:active{
+  transition: all 0.5s ease;
+  color: rgb(255, 255, 255);
+}
+
+.horizontal-separator{
+  margin-left: 20px;
+  margin-right: 20px;
+  background-color: rgb(233, 131, 118);
+}
+
+.horizontal-separator-number{
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  background-color: rgb(233, 131, 118);
+}
+
+.main-scrolled-window {
+  margin-right: 5px;
+  margin-left: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.main-scrolled-window overshoot{
+  background-image: none;
+}
+
+.main-scrolled-window slider{
+  background-image: none;
+  background-color: rgb(200, 60, 100);
+  border: 5px solid transparent;
+}
+
+.main-scrolled-window scrollbar{
+  background-color: transparent;
+  border: none;
+}
+
+.main-frame{
+  color: rgb(233, 131, 118);
+  background-color: transparent;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.main-frame border {
+  border-radius: 5px;
+  border: 1px dotted rgb(200, 60, 100);
+}
+
+.main-frame label {
+  font-weight: 200;
+  font-family: 'Fira Code';
+}
+
+.number-box{
+  margin-bottom: 20px;
 }

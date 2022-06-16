@@ -1,4 +1,4 @@
-require "../src/layout"
+require "../src/haki"
 
-builder = Layout::Transpiler::Builder.new
+builder = Haki::Builder.new
 builder.build_from_document(document: "#{__DIR__}/dist/index.html")

@@ -1,12 +1,8 @@
-name: layout
+name: haki
 version: 0.1.0
 
 authors:
   - Giorgi Kavrelishvili <giorgi.kavrelishvili@pm.me>
-
-targets:
-  layout:
-    main: src/layout.cr
 
 dependencies:
   duktape:
@@ -14,10 +10,6 @@ dependencies:
 
   gobject:
     github: jhass/crystal-gobject
-
-  beautify:
-    github: grkek/beautify
-    branch: master
 
 development_dependencies:
   ameba:

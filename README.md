@@ -1,6 +1,6 @@
-# Layout
+# Haki
 
-[![Showcase](https://i.ibb.co/wdGhw8X/Screenshot-2021-06-02-at-20-31-51.png)](https://github.com/grkek/layout)
+[![Showcase](https://i.ibb.co/wdGhw8X/Screenshot-2021-06-02-at-20-31-51.png)](https://github.com/grkek/haki)
 
 **Notice:** This project is <ins>experimental</ins>.
 
@@ -16,8 +16,8 @@
 Before you clone the shard and build it, install the GTK libraries.
 
 ```bash
-git clone git@github.com:grkek/layout.git
-cd layout
+git clone git@github.com:grkek/haki.git
+cd haki
 shards install
 ```
 
