@@ -26,15 +26,17 @@ module Haki
 
         scrolled_window = Gtk::ScrolledWindow.new(name: id, halign: horizontal_align, valign: vertical_align)
 
-        scrolled_window.on_event_after do |_widget, event|
-          case event.event_type
-          when Gdk::EventType::MOTION_NOTIFY
-            false
-          else
-            # TODO: Add an event handler for the components to forward information to JavaScript.
-            true
-          end
-        end
+        # event_controller = Gtk::EventControllerLegacy.new
+        # event_controller.event_signal.connect(after: true) do |event|
+        #   case event.event_type
+        #   when Gdk::EventType::MotionNotify
+        #     false
+        #   else
+        #     # TODO: Add an event handler for the components to forward information to JavaScript.
+        #     true
+        #   end
+        # end
+        # scrolled_window.add_controller(event_controller)
 
         containerize(widget, scrolled_window, box_expand, box_fill, box_padding)
         add_class_to_css(scrolled_window, class_name)

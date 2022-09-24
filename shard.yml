@@ -8,8 +8,8 @@ dependencies:
   duktape:
     github: jessedoyle/duktape.cr
 
-  gobject:
-    github: jhass/crystal-gobject
+  gtk4:
+    github: hugopl/gtk4.cr
 
 development_dependencies:
   ameba:

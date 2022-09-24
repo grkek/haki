@@ -32,28 +32,30 @@ module Haki
 
         case relief
         when "none"
-          relief_style = Gtk::ReliefStyle::NONE
+          relief_style = false
         when "normal"
-          relief_style = Gtk::ReliefStyle::NORMAL
+          relief_style = true
         else
-          relief_style = Gtk::ReliefStyle::NORMAL
+          relief_style = false
         end
 
-        button = Gtk::Button.new(name: id, label: text, relief: relief_style, halign: horizontal_align, valign: vertical_align)
+        button = Gtk::Button.new(name: id, label: text, has_frame: relief_style, halign: horizontal_align, valign: vertical_align)
 
         Duktape::Engine.instance.eval! ["const", id, "=", {type: "Button", className: class_name, availableCallbacks: ["onEvent", "onClick"]}.to_json].join(" ")
 
-        button.on_event_after do |_widget, event|
-          case event.event_type
-          when Gdk::EventType::MOTION_NOTIFY
-            false
-          else
-            Duktape::Engine.instance.eval! [id, ".", "onEvent", "(", "\"", event.event_type.to_s, "\"", ")"].join
-            true
-          end
-        end
+        # event_controller = Gtk::EventControllerLegacy.new
+        # event_controller.event_signal.connect(after: true) do |event|
+        #   case event.event_type
+        #   when Gdk::EventType::MotionNotify
+        #     false
+        #   else
+        #     Duktape::Engine.instance.eval! [id, ".", "onEvent", "(", "\"", event.event_type.to_s, "\"", ")"].join
+        #     true
+        #   end
+        # end
+        # button.add_controller(event_controller)
 
-        button.on_clicked do
+        button.clicked_signal.connect do
           Duktape::Engine.instance.eval! [id, ".", "onClick", "()"].join
         end
 

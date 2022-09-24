@@ -36,8 +36,7 @@ module Haki
           default_height: height.to_i
         )
 
-        window.try(&.connect "destroy", &->exit)
-        window.position = Gtk::WindowPosition::CENTER_ALWAYS
+        window.destroy_signal.connect(->exit)
 
         add_class_to_css(window, class_name)
 

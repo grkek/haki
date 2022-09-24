@@ -31,27 +31,27 @@ module Haki
 
         Duktape::Engine.instance.eval! ["const", id, "=", {type: "Entry", className: class_name, avaliableCallbacks: ["onInsertedText", "onDeletedText", "onCutClipboard", "onCopyClipboard", "onPasteClipboard", "onActivate"]}.to_json].join(" ")
 
-        entry.buffer.on_inserted_text do |buffer|
-          Duktape::Engine.instance.eval! [id, ".", "onInsertedText", "(", "\"", buffer.text, "\"", ")"].join
+        entry.buffer.inserted_text_signal.connect do
+          Duktape::Engine.instance.eval! [id, ".", "onInsertedText", "(", "\"", entry.buffer.text, "\"", ")"].join
         end
 
-        entry.buffer.on_deleted_text do |buffer|
-          Duktape::Engine.instance.eval! [id, ".", "onDeletedText", "(", "\"", buffer.text, "\"", ")"].join
+        entry.buffer.deleted_text_signal.connect do
+          Duktape::Engine.instance.eval! [id, ".", "onDeletedText", "(", "\"", entry.buffer.text, "\"", ")"].join
         end
 
-        entry.on_cut_clipboard do
-          Duktape::Engine.instance.eval! [id, ".", "onCutClipboard", "(", "\"", entry.buffer.text, "\"", ")"].join
-        end
+        # entry.on_cut_clipboard do
+        #   Duktape::Engine.instance.eval! [id, ".", "onCutClipboard", "(", "\"", entry.buffer.text, "\"", ")"].join
+        # end
 
-        entry.on_copy_clipboard do
-          Duktape::Engine.instance.eval! [id, ".", "onCopyClipboard", "(", "\"", entry.buffer.text, "\"", ")"].join
-        end
+        # entry.on_copy_clipboard do
+        #   Duktape::Engine.instance.eval! [id, ".", "onCopyClipboard", "(", "\"", entry.buffer.text, "\"", ")"].join
+        # end
 
-        entry.on_paste_clipboard do
-          Duktape::Engine.instance.eval! [id, ".", "onPasteClipboard", "(", "\"", entry.buffer.text, "\"", ")"].join
-        end
+        # entry.on_paste_clipboard do
+        #   Duktape::Engine.instance.eval! [id, ".", "onPasteClipboard", "(", "\"", entry.buffer.text, "\"", ")"].join
+        # end
 
-        entry.on_activate do
+        entry.activate_signal.connect do
           Duktape::Engine.instance.eval! [id, ".", "onActivate", "(", "\"", entry.buffer.text, "\"", ")"].join
         end
 
@@ -63,15 +63,17 @@ module Haki
           box_padding = box_padding[..box_padding.size - 3]
         end
 
-        entry.on_event_after do |_widget, event|
-          case event.event_type
-          when Gdk::EventType::MOTION_NOTIFY
-            false
-          else
-            # TODO: Add an event handler for the components to forward information to JavaScript.
-            true
-          end
-        end
+        # event_controller = Gtk::EventControllerLegacy.new
+        # event_controller.event_signal.connect(after: true) do |event|
+        #   case event.event_type
+        #   when Gdk::EventType::MotionNotify
+        #     false
+        #   else
+        #     # TODO: Add an event handler for the components to forward information to JavaScript.
+        #     true
+        #   end
+        # end
+        # entry.add_controller(event_controller)
 
         containerize(widget, entry, box_expand, box_fill, box_padding)
         add_class_to_css(entry, class_name)

@@ -27,15 +27,17 @@ module Haki
 
         list_box = Gtk::ListBox.new(name: id, halign: horizontal_align, valign: vertical_align)
 
-        list_box.on_event_after do |_widget, event|
-          case event.event_type
-          when Gdk::EventType::MOTION_NOTIFY
-            false
-          else
-            # TODO: Add an event handler for the components to forward information to JavaScript.
-            true
-          end
-        end
+        # event_controller = Gtk::EventControllerLegacy.new
+        # event_controller.event_signal.connect(after: true) do |event|
+        #   case event.event_type
+        #   when Gdk::EventType::MotionNotify
+        #     false
+        #   else
+        #     # TODO: Add an event handler for the components to forward information to JavaScript.
+        #     true
+        #   end
+        # end
+        # list_box.add_controller(event_controller)
 
         containerize(widget, list_box, box_expand, box_fill, box_padding)
         add_class_to_css(list_box, class_name)

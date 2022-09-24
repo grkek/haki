@@ -31,15 +31,17 @@ module Haki
 
         Duktape::Engine.instance.eval! ["const", id, "=", {type: "Label", className: class_name, availableCallbacks: ["onEvent"], avaliableFunctions: ["currentValue"]}.to_json].join(" ")
 
-        label.on_event_after do |_widget, event|
-          case event.event_type
-          when Gdk::EventType::MOTION_NOTIFY
-            false
-          else
-            # TODO: Add an event handler for the components to forward information to JavaScript.
-            true
-          end
-        end
+        # event_controller = Gtk::EventControllerLegacy.new
+        # event_controller.event_signal.connect(after: true) do |event|
+        #   case event.event_type
+        #   when Gdk::EventType::MotionNotify
+        #     false
+        #   else
+        #     # TODO: Add an event handler for the components to forward information to JavaScript.
+        #     true
+        #   end
+        # end
+        # label.add_controller(event_controller)
 
         containerize(widget, label, box_expand, box_fill, box_padding)
         add_class_to_css(label, class_name)

@@ -36,21 +36,23 @@ module Haki
 
         Duktape::Engine.instance.eval! ["const", id, "=", {type: "Switch", className: class_name, availableCallbacks: ["onStateSet", "onEvent"]}.to_json].join(" ")
 
-        switch.on_state_set do
-          Duktape::Engine.instance.eval! [id, ".", "onStateSet", "(", switch.active, ")"].join
+        # switch.state_set_signal.connect do
+        #   Duktape::Engine.instance.eval! [id, ".", "onStateSet", "(", switch.active, ")"].join
 
-          true
-        end
+        #   true
+        # end
 
-        switch.on_event_after do |_widget, event|
-          case event.event_type
-          when Gdk::EventType::MOTION_NOTIFY
-            false
-          else
-            Duktape::Engine.instance.eval! [id, ".", "onEvent", "(", "\"", event.event_type.to_s, "\"", ")"].join
-            true
-          end
-        end
+        # event_controller = Gtk::EventControllerLegacy.new
+        # event_controller.event_signal.connect(after: true) do |event|
+        #   case event.event_type
+        #   when Gdk::EventType::MotionNotify
+        #     false
+        #   else
+        #     Duktape::Engine.instance.eval! [id, ".", "onEvent", "(", "\"", event.event_type.to_s, "\"", ")"].join
+        #     true
+        #   end
+        # end
+        # switch.add_controller(event_controller)
 
         containerize(widget, switch, box_expand, box_fill, box_padding)
         add_class_to_css(switch, class_name)

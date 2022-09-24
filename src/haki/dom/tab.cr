@@ -27,15 +27,17 @@ module Haki
           box_padding = box_padding[..box_padding.size - 3]
         end
 
-        tab.on_event_after do |_widget, event|
-          case event.event_type
-          when Gdk::EventType::MOTION_NOTIFY
-            false
-          else
-            # TODO: Add an event handler for the components to forward information to JavaScript.
-            true
-          end
-        end
+        # event_controller = Gtk::EventControllerLegacy.new
+        # event_controller.event_signal.connect(after: true) do |event|
+        #   case event.event_type
+        #   when Gdk::EventType::MotionNotify
+        #     false
+        #   else
+        #     # TODO: Add an event handler for the components to forward information to JavaScript.
+        #     true
+        #   end
+        # end
+        # tab.add_controller(event_controller)
 
         containerize(widget, tab, box_expand, box_fill, box_padding)
         add_class_to_css(tab, class_name)

@@ -17,10 +17,10 @@ module Haki
                 file = sbx.require_string(-1)
 
                 css_provider = Gtk::CssProvider.new
-                css_provider.load_from_path([folder, file].join("/"))
+                css_provider.load_from_path(Path[folder, file].to_s)
                 display = Gdk::Display.default.not_nil!
-                screen = display.default_screen
-                Gtk::StyleContext.add_provider_for_screen screen, css_provider, Gtk::STYLE_PROVIDER_PRIORITY_APPLICATION
+
+                Gtk::StyleContext.add_provider_for_display(display, css_provider, Gtk::STYLE_PROVIDER_PRIORITY_APPLICATION.to_u32)
               end
 
               sbx.call_success
@@ -36,8 +36,8 @@ module Haki
             css_provider = Gtk::CssProvider.new
             css_provider.load_from_path(file)
             display = Gdk::Display.default.not_nil!
-            screen = display.default_screen
-            Gtk::StyleContext.add_provider_for_screen screen, css_provider, Gtk::STYLE_PROVIDER_PRIORITY_APPLICATION
+
+            Gtk::StyleContext.add_provider_for_display(display, css_provider, Gtk::STYLE_PROVIDER_PRIORITY_APPLICATION.to_u32)
             sbx.call_success
           end
 

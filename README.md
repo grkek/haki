@@ -19,6 +19,7 @@ Before you clone the shard and build it, install the GTK libraries.
 git clone git@github.com:grkek/haki.git
 cd haki
 shards install
+./bin/gi-crystal
 ```
 
 # Usage

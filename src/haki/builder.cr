@@ -1,4 +1,4 @@
-require "gobject/gtk"
+require "gtk4"
 require "uuid"
 
 module Haki
@@ -21,7 +21,7 @@ module Haki
             application_id: structure.as(Element).attributes["applicationId"]? || ["com", "haki", UUID.random.hexstring].join(".")
           )
 
-          application.on_activate do
+          application.activate_signal.connect do
             build_components(structure, application)
 
             elements = structure.children.reject! do |child|
@@ -37,7 +37,7 @@ module Haki
               Duktape::Engine.instance.eval! script
             end
 
-            window.try(&.show_all)
+            window.try(&.show)
           end
 
           application.run
@@ -106,8 +106,8 @@ module Haki
       css_provider = Gtk::CssProvider.new
       css_provider.load_from_path(child.attributes["src"])
       display = Gdk::Display.default.not_nil!
-      screen = display.default_screen
-      Gtk::StyleContext.add_provider_for_screen screen, css_provider, Gtk::STYLE_PROVIDER_PRIORITY_APPLICATION
+
+      Gtk::StyleContext.add_provider_for_display(display, css_provider, Gtk::STYLE_PROVIDER_PRIORITY_APPLICATION.to_u32)
     end
 
     # Build components from the main document model, start with either a StyleSheet component or the Window component.

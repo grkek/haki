@@ -27,15 +27,17 @@ module Haki
 
         frame = Gtk::Frame.new(name: id, label: value, halign: horizontal_align, valign: vertical_align)
 
-        frame.on_event_after do |_widget, event|
-          case event.event_type
-          when Gdk::EventType::MOTION_NOTIFY
-            false
-          else
-            # TODO: Add an event handler for the components to forward information to JavaScript.
-            true
-          end
-        end
+        # event_controller = Gtk::EventControllerLegacy.new
+        # event_controller.event_signal.connect(after: true) do |event|
+        #   case event.event_type
+        #   when Gdk::EventType::MotionNotify
+        #     false
+        #   else
+        #     # TODO: Add an event handler for the components to forward information to JavaScript.
+        #     true
+        #   end
+        # end
+        # frame.add_controller(event_controller)
 
         containerize(widget, frame, box_expand, box_fill, box_padding)
         add_class_to_css(frame, class_name)

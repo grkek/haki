@@ -37,17 +37,17 @@ module Haki
       private def to_align(str : String) : Gtk::Align
         case str
         when "fill"
-          Gtk::Align::FILL
+          Gtk::Align::Fill
         when "start"
-          Gtk::Align::START
+          Gtk::Align::Start
         when "end"
-          Gtk::Align::END
+          Gtk::Align::End
         when "center"
-          Gtk::Align::CENTER
+          Gtk::Align::Center
         when "baseline"
-          Gtk::Align::BASELINE
+          Gtk::Align::Baseline
         else
-          Gtk::Align::BASELINE
+          Gtk::Align::Baseline
         end
       end
 
@@ -71,13 +71,23 @@ module Haki
         when Gtk::Notebook
           widget.append_page(component, nil)
         when Gtk::Box
-          widget.pack_start(component, to_bool(box_expand), to_bool(box_fill), box_padding.to_i)
+          expand = to_bool(box_expand)
+          component.hexpand = expand
+          component.vexpand = expand
+
+          margin = box_padding.to_i
+          component.margin_top = margin
+          component.margin_bottom = margin
+          component.margin_start = margin
+          component.margin_end = margin
+
+          widget.append(component)
         when Gtk::ScrolledWindow, Gtk::Frame
-          widget.add(component)
+          widget.child = component
         when Gtk::ListBox
           widget.insert(component, 1_000_000)
         when Gtk::ApplicationWindow
-          widget.add(component)
+          widget.child = component
         end
       end
 
