@@ -45,8 +45,20 @@ module Haki
 
         JavaScript::Engine.instance.sandbox.put_global_string(id)
       when "Entry"
+        index = JavaScript::Engine.instance.sandbox.push_object
+        entry = @widget.as(Gtk::Entry)
+
+        JavaScript::Engine.instance.sandbox.put_global_string(id)
       when "Frame"
+        index = JavaScript::Engine.instance.sandbox.push_object
+        frame = @widget.as(Gtk::Frame)
+
+        JavaScript::Engine.instance.sandbox.put_global_string(id)
       when "Image"
+        index = JavaScript::Engine.instance.sandbox.push_object
+        image = @widget.as(Gtk::Image)
+
+        JavaScript::Engine.instance.sandbox.put_global_string(id)
       when "Label"
         index = JavaScript::Engine.instance.sandbox.push_object
         label = @widget.as(Gtk::Label)
@@ -224,11 +236,30 @@ module Haki
 
         JavaScript::Engine.instance.sandbox.put_global_string(id)
       when "ListBox"
+        index = JavaScript::Engine.instance.sandbox.push_object
+        list_box = @widget.as(Gtk::ListBox)
+
+        JavaScript::Engine.instance.sandbox.put_global_string(id)
       when "ScrolledWindow"
+        index = JavaScript::Engine.instance.sandbox.push_object
+        scrolled_window = @widget.as(Gtk::ScrolledWindow)
+
+        JavaScript::Engine.instance.sandbox.put_global_string(id)
       when "Switch"
+        index = JavaScript::Engine.instance.sandbox.push_object
+        switch = @widget.as(Gtk::Switch)
+
+        JavaScript::Engine.instance.sandbox.put_global_string(id)
       when "Tab"
+        index = JavaScript::Engine.instance.sandbox.push_object
+        tab = @widget.as(Gtk::Notebook)
+
+        JavaScript::Engine.instance.sandbox.put_global_string(id)
       when "TextView"
-        raise "Not implemented"
+        index = JavaScript::Engine.instance.sandbox.push_object
+        text_view = @widget.as(Gtk::TextView)
+
+        JavaScript::Engine.instance.sandbox.put_global_string(id)
       when "Window"
         index = JavaScript::Engine.instance.sandbox.push_object
         application_window = @widget.as(Gtk::ApplicationWindow)
