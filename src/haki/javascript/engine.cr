@@ -76,13 +76,14 @@ module Haki
           request = Message::Request.from_json(client.gets || raise "Empty message provided to the JavaScript engine")
 
           @mutex.synchronize do
-            if request.processing == JavaScript::Message::Processing::EVENT
+            if request.processing == Message::Processing::EVENT
               Registry.instance.refresh_state(request.id)
             end
 
             if source_code = request.source_code
               begin
                 Log.debug { "Evaluating code from #{request.id}, #{request.file}:#{request.line}, #{request.source_code}" }
+
                 eval! source_code
               rescue exception
                 Log.debug(exception: exception) { exception.message }
@@ -93,7 +94,7 @@ module Haki
       end
 
       private def eval!(source_code : String, preset : String = "es2015")
-        @sandbox.eval_mutex! ["eval(Babel.transform(", source_code.to_json, ", {presets: ['#{preset}']}).code)"].join
+        @sandbox.eval_mutex! JSON.parse(@sandbox.call("Babel.transform", source_code, {presets: ["#{preset}"]}).to_json)["code"].to_s
       end
     end
   end
