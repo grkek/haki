@@ -1,0 +1,33 @@
+name: haki
+version: 0.1.0
+
+authors:
+  - Giorgi Kavrelishvili <giorgi.kavrelishvili@pm.me>
+
+dependencies:
+  duktape:
+    github: grkek/duktape.cr
+    branch: master
+
+  gtk4:
+    github: hugopl/gtk4.cr
+
+  idle-gc:
+    github: compumike/idle-gc
+
+  baked_file_system:
+    github: schovi/baked_file_system
+
+  non-blocking-spawn:
+    github: GeopJr/non-blocking-spawn
+
+scripts:
+  postinstall: "make install"
+
+development_dependencies:
+  ameba:
+    github: crystal-ameba/ameba
+
+crystal: 1.0.0
+
+license: MIT

@@ -1,0 +1,8 @@
+/doc/
+/lib/
+/bin/
+/.shards/
+/src/haki/support/babel.js
+/src/haki/support/core.js
+
+/shard.lock
