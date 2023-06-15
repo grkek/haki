@@ -125,7 +125,7 @@ module Haki
 
         case first_child
         when Text
-          css_provider.load_from_data(first_child.content.bytes)
+          css_provider.load_from_data(first_child.content, first_child.content.size.to_i64)
         end
       end
 
